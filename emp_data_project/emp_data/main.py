@@ -4,9 +4,10 @@ from Database import *
 
 
 def main():
-    gui = Gui
+    gui = Gui()
     gui.loginScreen()
 
 
 if __name__ == '__main__':
     main()
+
