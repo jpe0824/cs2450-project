@@ -1,9 +1,16 @@
 #TODO create class for gui code
 
+from curses import window
 from ipaddress import collapse_addresses
 import tkinter as tk
 
 class Gui:
+    def __init__(self):
+        window = tk.Tk()
+        self.screen_height = window.winfo_screenheight()
+        self.screen_width = window.winfo_screenwidth()
+        
+
     def loginScreen():
         window = tk.Tk()
         window.title("Login form")
