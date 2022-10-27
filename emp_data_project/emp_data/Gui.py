@@ -5,6 +5,8 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter import font  as tkfont
 
+
+#test database will contain a key (employee id) with a value containing employee password and privileges. 
 testDataBase = {
             '999999': ['password', 'admin'],
             '123456': ['password', 'employee']
@@ -39,14 +41,14 @@ class EmpApp(tk.Tk):
 
 class LoginPage(tk.Frame):
     def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
+        tk.Frame.__init__(self, parent, bg='#333333')
         self.controller = controller
-        self.employee = None
+        self.employee = None # when user logs in, self.employee will contain employee id for reference. 
 
         username = StringVar()
         password = StringVar()
         
-        
+        # LabelFrame makes container for widgets in order to center login screen within main window
         border = tk.LabelFrame(self, text='Login', bg='#333333', fg="#FF3399", font=("Arial Bold", 20))
         border.pack(fill="both", expand="yes", padx=150, pady=150)
 
@@ -74,14 +76,16 @@ class LoginPage(tk.Frame):
                 self.employee = self.username_entry.get()
                 self.username_entry.delete(0, END)
                 self.password_entry.delete(0, END)
+                #----------------------------------------------------
                 self.focus() #removes focus on data fields
-                if testDataBase[self.employee][1] != 'admin':
-                    self.controller.frames['home_page'].addEmpBtn.pack_forget()
+                
+                if testDataBase[self.employee][1] != 'admin':                      
+                    self.controller.frames['home_page'].addEmpBtn.pack_forget()       # removes 'Add Employee Button' when user doesn't have admin privileges. 
                 elif testDataBase[self.employee][1] == 'admin':
-                    self.controller.frames['home_page'].addEmpBtn.pack()
-                self.controller.show_frame("home_page")
+                    self.controller.frames['home_page'].addEmpBtn.pack()          # relitialize home page to include 'Add Employee Button' when user has admin privilege.
+                self.controller.show_frame("home_page")                  # calls show_frame from class EmpApp to change the frame to home_page
            else:
-               self.password_entry.delete(0, END)
+               self.password_entry.delete(0, END)                            
                messagebox.showerror("Invalid","invalid password")
 
         else: 
@@ -127,14 +131,14 @@ class payroll_info_page(tk.Frame):
         self.controller = controller
         label = tk.Label(self, text="Payroll Page", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
-        button = tk.Button(self, text="Home",
+        self.home = tk.Button(self, text="Home",
                                command= lambda: controller.show_frame("home_page"))
-        button.pack()
+        self.home.pack()
 
-        logoutBtn = tk.Button(self, text="Logout",
+        self.logoutBtn = tk.Button(self, text="Logout",
                                command= lambda: controller.show_frame("LoginPage"))
-        logoutBtn.pack()
-        logoutBtn.place(x=750,y=0)
+        self.logoutBtn.pack()
+        self.logoutBtn.place(x=750,y=0)
 
 class profile_page(tk.Frame):
     def __init__(self, parent, controller):
@@ -142,13 +146,13 @@ class profile_page(tk.Frame):
         self.controller = controller
         label = tk.Label(self, text="Profile Page", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
-        button = tk.Button(self, text="Home",
+        self.home = tk.Button(self, text="Home",
                                command= lambda: controller.show_frame("home_page"))
-        button.pack()
-        logoutBtn = tk.Button(self, text="Logout",
+        self.home.pack()
+        self.logoutBtn = tk.Button(self, text="Logout",
                                command= lambda: controller.show_frame("LoginPage"))
-        logoutBtn.pack()
-        logoutBtn.place(x=750,y=0)
+        self.logoutBtn.pack()
+        self.logoutBtn.place(x=750,y=0)
 
 class employee_directory_page(tk.Frame):
     def __init__(self, parent, controller):
@@ -156,13 +160,13 @@ class employee_directory_page(tk.Frame):
         self.controller = controller
         label = tk.Label(self, text="Employee Directory Page", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
-        button = tk.Button(self, text="Home",
+        self.home = tk.Button(self, text="Home",
                                command= lambda: controller.show_frame("home_page"))
-        button.pack()
-        logoutBtn = tk.Button(self, text="Logout",
+        self.home.pack()
+        self.logoutBtn = tk.Button(self, text="Logout",
                                command= lambda: controller.show_frame("LoginPage"))
-        logoutBtn.pack()
-        logoutBtn.place(x=750,y=0)
+        self.logoutBtn.pack()
+        self.logoutBtn.place(x=750,y=0)
 
 class add_employee_page(tk.Frame):
     def __init__(self, parent, controller):
@@ -170,24 +174,14 @@ class add_employee_page(tk.Frame):
         self.controller = controller
         label = tk.Label(self, text="New Employee", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
-        button = tk.Button(self, text="Cancel",
+        self.home = tk.Button(self, text="Cancel",
                                command= lambda: controller.show_frame("home_page"))
-        button.pack()
-        sumbitBnt = tk.Button(self, text="Submit")
-        sumbitBnt.pack()
-        logoutBtn = tk.Button(self, text="Logout",
+        self.home.pack()
+        self.sumbitBnt = tk.Button(self, text="Submit")
+        self.sumbitBnt.pack()
+        self.logoutBtn = tk.Button(self, text="Logout",
                                command= lambda: controller.show_frame("LoginPage"))
-        logoutBtn.pack()
-        logoutBtn.place(x=750,y=0)
+        self.logoutBtn.pack()
+        self.logoutBtn.place(x=750,y=0)
 
 
-
-
-
-def main():
-    app = EmpApp()
-    app.mainloop()
-
-
-if __name__ == '__main__':
-    main()
