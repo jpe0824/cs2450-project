@@ -22,29 +22,29 @@ class Employee:
         self.job_dept = job_dept
         self.email = email
 
-        '''if classification == '3':
+        if classification == '3':
             self.classification = Hourly(rate)
         elif classification == '1':
             self.classification = Salaried(salary)
-        elif classification == '2':
-            self.classification = Commissioned(salary,comm_rate)'''
+        '''elif classification == '2':
+            self.classification = Commissioned(salary,comm_rate)''' # Add comm_rate to employee
 
-    '''def make_hourly(self,rate):
+    def make_hourly(self,rate):
         self.pay_classification = Hourly(rate)
 
     def make_salaried(self):
-        self.pay_classification = 'salaried'
+        self.pay_classification = Salaried(salary)
 
-    def make_commissioned(self):
-        self.pay_classification = 'commissioned'
+    '''def make_commissioned(self):
+        self.pay_classification = Commissioned(salary,comm_rate'''
 
     def issue_payment(self):
         pass
 
     def generate_pay_report(self):
-        pass'''
+        pass
 
-'''class Hourly(Classification):
+class Hourly(Classification):
     def __init__(self,hourly_rate):
         self.hourly_rate = float(hourly_rate)
         self.hours_worked = []
@@ -58,4 +58,4 @@ class Employee:
             total_hours += hour
         pay = total_hours * self.hourly_rate
         self.hours_worked = []
-        return float(pay)'''
+        return float(pay)
