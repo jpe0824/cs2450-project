@@ -84,10 +84,10 @@ class Employee:
     def make_hourly(self,rate):
         self.pay_classification = Hourly(rate)
 
-    def make_salaried(self):
+    def make_salaried(self,salary):
         self.pay_classification = Salaried(salary)
 
-    def make_commissioned(self):
+    def make_commissioned(self,salary,comm_rate):
         self.pay_classification = Commissioned(salary,comm_rate)
 
     def issue_payment(self):
@@ -98,7 +98,7 @@ class Employee:
         else:
             pass
 
-    def generate_pay_report(self): # Need to define
+    def generate_pay_report(self): # Need to define. Does it use PAY_LOGFILE?
         '''Generates pay report for employee'''
         pass
 
