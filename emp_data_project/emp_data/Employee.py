@@ -107,7 +107,7 @@ class Classification(ABC):
         pass
 
 class Salaried(Classification):
-    def __init__(self,salary):
+    def __init__(self, salary):
         self.salary = float(salary)
 
     def issue_payment(self):
@@ -115,7 +115,7 @@ class Salaried(Classification):
         return float(pay)
 
 class Hourly(Classification):
-    def __init__(self,hourly_rate):
+    def __init__(self, hourly_rate):
         self.hourly_rate = float(hourly_rate)
         self.hours_worked = []
     
