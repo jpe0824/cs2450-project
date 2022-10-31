@@ -98,8 +98,21 @@ class Employee:
         else:
             pass
 
-    def generate_pay_report(self):
+    def generate_pay_report(self): # Need to define
+        '''Generates pay report for employee'''
         pass
+
+class Classification(ABC):
+    def issue_payment():
+        pass
+
+class Salaried(Classification):
+    def __init__(self,salary):
+        self.salary = float(salary)
+
+    def issue_payment(self):
+        pay = self.salary/24
+        return float(pay)
 
 class Hourly(Classification):
     def __init__(self,hourly_rate):
@@ -115,4 +128,22 @@ class Hourly(Classification):
             total_hours += hour
         pay = total_hours * self.hourly_rate
         self.hours_worked = []
+        return float(pay)
+
+class Commissioned(Classification):
+    def __init__(self, salary, comm_rate):
+        self.salary = float(salary)
+        self.comm_rate = (float(comm_rate))/100
+        self.receipts = []
+    
+    def add_receipt(self,amount):
+        self.receipts.append(amount)
+
+    def issue_payment(self):
+        total_receipts = 0
+        for receipt in self.receipts:
+            total_receipts += receipt
+
+        pay = (self.salary/24)+(self.comm_rate * total_receipts)
+        self.receipts = []
         return float(pay)
