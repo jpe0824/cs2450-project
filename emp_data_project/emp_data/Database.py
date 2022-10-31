@@ -4,11 +4,11 @@ class Database:
     def __init__(self):
         pass
 
-    def load_emp(self):
+    def load_emp(self, emp):
         # Brings up Employee and info concerning said employee
         pass
 
-    def save_emp(self):
+    def save_emp(self, emp):
         # Saves data of employee into employee database
         pass
 
@@ -16,7 +16,7 @@ class Database:
         # Allows creation of new employee data to add
         pass
 
-    def deactivate_emp(self):
+    def deactivate_emp(self, emp):
         # Removes employee from database in files
         pass
 
