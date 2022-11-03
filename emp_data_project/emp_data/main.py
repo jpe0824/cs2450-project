@@ -4,8 +4,9 @@ from Database import *
 
 
 def main():
-    gui = Gui
-    gui.loginScreen()
+    app = EmpApp()
+    app.mainloop()
+
 
 
 if __name__ == '__main__':
