@@ -1,4 +1,6 @@
 #TODO outline database class, attr, methods
+# Questions for meeting:
+# how to save between runs
 
 class Database:
     def __init__(self):
