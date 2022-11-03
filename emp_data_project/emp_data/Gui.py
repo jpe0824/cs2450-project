@@ -10,10 +10,11 @@ class Gui:
         self.screen_height = self.window.winfo_screenheight()
         self.screen_width = self.window.winfo_screenwidth()
         
-
-    def loginScreen(self):
-        self.window.title("Login form")
-        self.window.geometry('340x440')
+#test
+    def loginScreen():
+        window = tk.Tk()
+        window.title("Login form")
+        window.geometry('340x440')
         #window.configure(bg='#333333')
 
 
