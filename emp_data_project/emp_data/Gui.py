@@ -9,7 +9,9 @@ from tkinter import font  as tkfont
 #test database will contain a key (employee id) with a value containing employee password and privileges. 
 testDataBase = {
             '999999': ['password', 'admin'],
-            '123456': ['password', 'employee']
+            '123456': ['password', 'employee'],
+            '0': ['0', 'admin'],
+            '1': ['1', 'employee']
             }
 
 
@@ -120,6 +122,7 @@ class home_page(tk.Frame):
                                command= lambda: controller.show_frame("LoginPage"))
         self.logoutBtn.pack()
         self.logoutBtn.place(x=750,y=0)
+        
 
 
 
@@ -134,11 +137,35 @@ class payroll_info_page(tk.Frame):
         self.home = tk.Button(self, text="Home",
                                command= lambda: controller.show_frame("home_page"))
         self.home.pack()
+        
+        self.routing_number_label = tk.Label(self, text="Routing Number:", font=('Arial', 16))
+        self.routing_number_entry = tk.Entry(self, font=('Arial', 16))
+        
+        self.account_number_label = tk.Label(self, text="Account Number:", font=('Arial', 16))
+        self.account_number_entry = tk.Entry(self, font=('Arial', 16))
+    
+        self.payment_method_label = tk.Label(self, text="Payment Method:", font=('Arial', 16))
+        
+        # Initialize all checkbox's to have no value
+        self.capital_one=StringVar()
+        self.capital_one.set("hellow")
+        #create checkbox with variable capital_one
+        self.direct_deposit_btn = Radiobutton(self, text="Direct Deposit", variable=self.capital_one, value="Direct Deposit", font=('Arial', 16))
+        self.check_btn = Radiobutton(self, text="Check", variable=self.capital_one, value="Check", font=('Arial', 16))
 
         self.logoutBtn = tk.Button(self, text="Logout",
                                command= lambda: controller.show_frame("LoginPage"))
+        
         self.logoutBtn.pack()
         self.logoutBtn.place(x=750,y=0)
+        self.home.place(x=700,y=0)
+        self.routing_number_label.place(x=50, y=100)
+        self.routing_number_entry.place(x=220, y=100)
+        self.account_number_label.place(x=50, y=150)
+        self.account_number_entry.place(x=220, y=150)
+        self.payment_method_label.place(x=50,y=200)
+        self.direct_deposit_btn.place(x=220,y=200)
+        self.check_btn.place(x=400,y=200)
 
 class profile_page(tk.Frame):
     def __init__(self, parent, controller):
@@ -146,13 +173,16 @@ class profile_page(tk.Frame):
         self.controller = controller
         label = tk.Label(self, text="Profile Page", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
+        
         self.home = tk.Button(self, text="Home",
                                command= lambda: controller.show_frame("home_page"))
         self.home.pack()
+        
         self.logoutBtn = tk.Button(self, text="Logout",
                                command= lambda: controller.show_frame("LoginPage"))
         self.logoutBtn.pack()
         self.logoutBtn.place(x=750,y=0)
+        self.home.place(x=700,y=0)
 
 class employee_directory_page(tk.Frame):
     def __init__(self, parent, controller):
@@ -167,6 +197,7 @@ class employee_directory_page(tk.Frame):
                                command= lambda: controller.show_frame("LoginPage"))
         self.logoutBtn.pack()
         self.logoutBtn.place(x=750,y=0)
+        self.home.place(x=700,y=0)
 
 class add_employee_page(tk.Frame):
     def __init__(self, parent, controller):
