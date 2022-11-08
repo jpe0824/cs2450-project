@@ -54,7 +54,7 @@ def process_receipts():
                 employee.classification.add_receipt(float(receipt))
 
 class Employee:
-    def __init__(self, emp_id, first_name, last_name, city, state, zipcode, classification, ssn, start_date, bank_info, dob, access_codes, job_title, job_dept, email, rate, salary, comm_rate):
+    def __init__(self, username, password, first_name, last_name, city, state, zipcode, classification, ssn, start_date, bank_info, dob, access_codes, job_title, job_dept, email, rate, salary, comm_rate, emp_id):
         self.emp_id = emp_id
         self.first_name = first_name
         self.last_name = last_name
@@ -73,6 +73,8 @@ class Employee:
         self.rate = rate
         self.salary = salary
         self.comm_rate = comm_rate
+        self.username = username
+        self.password = password
 
         if classification == '3':
             self.classification = Hourly(rate)

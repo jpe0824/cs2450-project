@@ -2,6 +2,8 @@
 # Questions for meeting:
 # how to save between runs
 import Employee
+# an employee must include:
+# 0username, 1password, 2first_name, 3last_name, 4city, 5state, 6zipcode, 7classification, 8ssnstart_date, 9bank_info, 10dob, 11access_codes, 12job_title, 13job_dept, 14email, 15rate, 16salary, 17comm_rate, 18 ID
 class Fake_employee:
     def __init__(self, username, password, ID):
         self.username = username
@@ -16,7 +18,6 @@ class Database:
         self.PASSWORD_INDEX = 1
         self.EMPLOYEE_TYPE_INDEX = 2
         self.ID_NUMBER_INDEX = 3
-        
 
 
     def load_user_data(self, username, password):
