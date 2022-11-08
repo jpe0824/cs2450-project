@@ -120,13 +120,50 @@ class Database:
         for line in data:
             emp_file.write(line)
 
-    def update_emp(self):
-        # Allows for changing of employee information by those with admin permissions
-        pass
+    def update_emp(self, ID_to_change, new_data):
+        '''Allows for changing of employee information by those with admin permissions'''
+        # does not verify that user has admin access because that is checked in the GUI
+        # ID CANNOT BE CHANGED
 
-    def update_self(self):
-        # Allows changing of personal information for those without admin permissions
-        pass
+        # open csv file
+        IN_FILE_NAME = "emp_data_project/emp_data/test.csv"
+        emp_file = open(IN_FILE_NAME, 'r')
+
+        # move to begining of file and load all data into memory
+        emp_file.seek(0)
+        data = emp_file.readlines()
+        print(data[0])
+
+        # generate new string with updated data for passed ID
+        my_string = ''
+        i = 0
+        while i < len(new_data):
+            my_string += str(new_data[i])
+            if i < len(new_data) - 1:
+                my_string += ','
+            i += 1
+        
+        # put new string into csv file
+        my_string += f',{ID_to_change}'
+        # if incerted at the end, do not add a newline
+        if ID_to_change != len(data):
+            my_string += '\n'
+
+        # replace old data with new data in list
+        data[int(ID_to_change) - 1] = my_string
+
+        emp_file.close()
+
+        # write the data to the file
+        emp_file = open(IN_FILE_NAME, 'w')
+        for line in data:
+            emp_file.write(line)
+
+    def update_self(self, new_data):
+        '''Allows changing of personal information for those without admin permissions
+        must be logged in and must pass a list of all data'''
+        self.update_emp(self.cur_emp.ID,new_data)
+        
 
     def report_database(self):
         # Produces report of information within the database for the user to view
@@ -140,9 +177,11 @@ class Database:
 
 def test_methods():
     my_database = Database()
-    mylyst = ['username3','password3',0]
+    mylyst = ['usernameTEST','passwordTEST',0]
 
-    #my_database.load_user_data('username1','password1')
+    my_database.load_user_data('john','ross')
     #my_database.create_emp(mylyst)
-    my_database.deactivate_emp(1)
+    #my_database.deactivate_emp(1)
+    #my_database.update_emp(1, mylyst)
+    my_database.update_self(mylyst)
 test_methods()
