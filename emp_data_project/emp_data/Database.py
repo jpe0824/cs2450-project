@@ -3,7 +3,6 @@
 # how to save between runs
 import Employee
 # an employee must include:
-# 0username, 1password, 2first_name, 3last_name, 4city, 5state, 6zipcode, 7classification, 8ssnstart_date, 9bank_info, 10dob, 11access_codes, 12job_title, 13job_dept, 14email, 15rate, 16salary, 17comm_rate, 18 ID
 class Fake_employee:
     def __init__(self, username, password, ID):
         self.username = username
@@ -13,11 +12,11 @@ class Fake_employee:
         
 class Database:
     def __init__(self):
-        self.cur_emp = ''
+        self.cur_user = ''
         self.USERNAME_INDEX = 0
         self.PASSWORD_INDEX = 1
         self.EMPLOYEE_TYPE_INDEX = 2
-        self.ID_NUMBER_INDEX = 3
+        self.ID_NUMBER_INDEX = 20
 
 
     def load_user_data(self, username, password):
@@ -42,17 +41,18 @@ class Database:
             cur_emp = (line.split(','))
 
             if username == cur_emp[self.USERNAME_INDEX] and password == cur_emp[self.PASSWORD_INDEX]:
-                if cur_emp[self.EMPLOYEE_TYPE_INDEX] == '2':
+                if str(cur_emp[self.EMPLOYEE_TYPE_INDEX]) == '2':
                     # employee has been deactivated and has no access
                     print("user found but account has been deactivated")
                     return False
             
                 # user has been found and is granted access: create employee object
-                user = Fake_employee(cur_emp[self.USERNAME_INDEX],cur_emp[self.PASSWORD_INDEX],cur_emp[self.ID_NUMBER_INDEX])
+                user = Employee.Employee(cur_emp[0],cur_emp[1],cur_emp[2],cur_emp[3],cur_emp[4],cur_emp[5],cur_emp[6],cur_emp[7],cur_emp[8],cur_emp[9],cur_emp[10],cur_emp[11],\
+                    cur_emp[12],cur_emp[13],cur_emp[14],cur_emp[15],cur_emp[16],cur_emp[17],cur_emp[18],cur_emp[19],cur_emp[20],)
                 print("User found and given access")
 
                 # set current user and return the user as an employee object
-                self.cur_emp = user
+                self.cur_user = user
                 return user
 
         # user wasnt in database, return false
@@ -163,7 +163,7 @@ class Database:
     def update_self(self, new_data):
         '''Allows changing of personal information for those without admin permissions
         must be logged in and must pass a list of all data'''
-        self.update_emp(self.cur_emp.ID,new_data)
+        self.update_emp(self.cur_user.emp_id,new_data)
         
 
     def report_database(self):
@@ -178,9 +178,9 @@ class Database:
 
 def test_methods():
     my_database = Database()
-    mylyst = ['usernameTEST','passwordTEST',0]
+    mylyst = ['username','password',0,'first_name','last_name','city','state','zipcode','classification','ssn','start_date','bank_info','dob','access_codes','job_title','job_dept','email','rate','salary','comm_rate',1]
 
-    my_database.load_user_data('john','ross')
+    my_database.load_user_data('username','password')
     #my_database.create_emp(mylyst)
     #my_database.deactivate_emp(1)
     #my_database.update_emp(1, mylyst)

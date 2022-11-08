@@ -1,3 +1,1 @@
-usernameTEST,passwordTEST,0,1
-username1,password1,0,2
-username2,password2,0,3
+username,password,0,first_name,last_name,city,state,zipcode,classification,ssn,start_date,bank_info,dob,access_codes,job_title,job_dept,email,rate,salary,comm_rate,1,1
