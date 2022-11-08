@@ -3,67 +3,122 @@
 # how to save between runs
 import Employee
 class Fake_employee:
-    def __init__(self):
-        self.employees = [[]]
-        self.cur_emp = ''
+    def __init__(self, username, password, ID):
+        self.username = username
+        self.password = password
+        self.ID = ID
+
         
 class Database:
     def __init__(self):
-        self.employees = [[]]
         self.cur_emp = ''
-
-    def load_employees(self):
-        IN_FILE_NAME = "emp_data_project/emp_data/test.csv"
+        self.USERNAME_INDEX = 0
+        self.PASSWORD_INDEX = 1
+        self.EMPLOYEE_TYPE_INDEX = 2
+        self.ID_NUMBER_INDEX = 3
         
+
+
+    def load_user_data(self, username, password):
+        ''' Brings up the user's data after checking username, password, and deactivated accounts '''
+
+
+
+        # Get file where data is stored
+        IN_FILE_NAME = "emp_data_project/emp_data/test.csv"
         emp_file = open(IN_FILE_NAME, 'r')
-        test_emp = Employee()
-        emp_file.readline()
-        for line in emp_file:
-            line_list = line.strip().split(",")
 
-            self.employees.append(Employee(line_list[0],line_list[1],line_list[2],line_list[3],line_list[4],line_list[5],line_list[6],line_list[7],line_list[8]\
-                ,line_list[9],line_list[10],line_list[11],line_list[12],line_list[13],line_list[14],line_list[15],line_list[16],line_list[17]))
+        # Read data into memory
+        employee_data = emp_file.readlines()
+        emp_file.close()
+        # Check each employee in database
+        for line in employee_data:
+            
+            # remove newline characters
+            line = line.replace('\n','')
 
-        print(self.employees)
+            # give each employee a list with their data
+            cur_emp = (line.split(','))
 
-    def build_database():
-        # creates a database that is based on employee IDs like so:
+            if username == cur_emp[self.USERNAME_INDEX] and password == cur_emp[self.PASSWORD_INDEX]:
+                if cur_emp[self.EMPLOYEE_TYPE_INDEX] == '2':
+                    # employee has been deactivated and has no access
+                    print("user found but account has been deactivated")
+                    return False
+            
+                # user has been found and is granted access: create employee object
+                user = Fake_employee(cur_emp[self.USERNAME_INDEX],cur_emp[self.PASSWORD_INDEX],cur_emp[self.ID_NUMBER_INDEX])
+                print("User found and given access")
+
+                # set current user and return the user as an employee object
+                self.cur_emp = user
+                return user
+
+        # user wasnt in database, return false
+        print('user not found')
+        return False
+
+    def create_emp(self, data_list):
+        # TODO check to make sure username is origional
         '''
-        [[1],[2],[3],[4],[5],[6],[7],[8],[9]
-        [10],[11],[12],[13],[14],[15],[16],[17],[18],[19]
-        ...
-        ...
-        ...
-        [91],[92],[93],[94],[95],[96],[97],[98],[99]]
+        # takes a list of employee's data and saves it to the CSV
+        # used to create new employees
+        # Employee is given an ID so no need to pass it in
         '''
-        # to find and insert data:
-        '''
-        if ID_number < 10:
-            row = 0
-            col = ID_number - 1
+        # open file
+        IN_FILE_NAME = "emp_data_project/emp_data/test.csv"
+        emp_file = open(IN_FILE_NAME, 'a+')
 
-        else:
-            col = (ID_number % 10) - 1
-            row = (ID_number // 10) - 1
-        '''
+        # move to begining of file and count all the lines
+        emp_file.seek(0)
+        ID_number = len(emp_file.readlines()) + 1
 
-        pass
-    def load_emp(self, cur_emp=''):
-        # Brings up Employee and info concerning said employee
-        pass
+        # write all the data on the next line
+        emp_file.write('\n')
 
-    def save_emp(self, cur_emp):
-        # Saves data of employee into employee database
-        pass
+        for data in data_list:
+            emp_file.write(str(data))
+            emp_file.write(',')
+        
+        # add the ID to the last spot on the line
+        emp_file.write(str(ID_number))
 
-    def create_emp(self):
-        # Allows creation of new employee data to add
-        pass
+        emp_file.close()
+        print('saved employee')
 
-    def deactivate_emp(self, cur_emp):
-        # Removes employee from database in files
-        # Flag ID so that new employees can use it
-        pass
+
+    def deactivate_emp(self, emp_ID):
+        # revokes access and changes status to deactive
+        IN_FILE_NAME = "emp_data_project/emp_data/test.csv"
+        emp_file = open(IN_FILE_NAME, 'r')
+
+        # move to begining of file and load all data into memory
+        emp_file.seek(0)
+        data = emp_file.readlines()
+        print(data[0])
+
+        # create a list of specific data points for employee
+        test = data[emp_ID - 1].split(',')
+        test[self.EMPLOYEE_TYPE_INDEX] = 2
+
+        # generate new string with updated deactive indicator
+        my_string = ''
+        i = 0
+        while i < len(test):
+            my_string += str(test[i])
+            if i < len(test) - 1:
+                my_string += ','
+            i += 1
+        
+        # replace old data with new data in list
+        data[emp_ID - 1] = my_string
+
+        emp_file.close()
+
+        # write the data to the file
+        emp_file = open(IN_FILE_NAME, 'w')
+        for line in data:
+            emp_file.write(line)
 
     def update_emp(self):
         # Allows for changing of employee information by those with admin permissions
@@ -71,10 +126,6 @@ class Database:
 
     def update_self(self):
         # Allows changing of personal information for those without admin permissions
-        pass
-
-    def merge_database(self):
-        # This method combines the data of separate files to form new database file for system
         pass
 
     def report_database(self):
@@ -85,12 +136,13 @@ class Database:
         # This formula verifies whether the specified file concerning the data entered is correct and valid according to data constraints
         pass
 
-    def import_database(self):
-        # Permits transfer of data from separate file for system
-        pass
 
-    def store_database(self):
-        #saves the database as txt before closing
-        pass
 
-my_database = Database()
+def test_methods():
+    my_database = Database()
+    mylyst = ['username3','password3',0]
+
+    #my_database.load_user_data('username1','password1')
+    #my_database.create_emp(mylyst)
+    my_database.deactivate_emp(1)
+test_methods()
