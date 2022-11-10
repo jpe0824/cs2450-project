@@ -1,6 +1,6 @@
-#TODO outline database class, attr, methods
-# Questions for meeting:
-# how to save between runs
+''' TO DO: outline database class, attr, methods
+Questions for meeting:
+how to save between runs '''
 import Employee
 # an employee must include:
 class Fake_employee:
