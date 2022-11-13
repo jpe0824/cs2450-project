@@ -26,6 +26,7 @@ class EmpApp(tk.Tk):
         container.pack(side="top", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1, minsize = 500)
         container.grid_columnconfigure(0, weight=1, minsize = 800)
+        self.resizable(False, False)
         self.frames = {}
         for F in (LoginPage, home_page, payroll_info_page, profile_page, employee_directory_page, add_employee_page):
             page_name = F.__name__
@@ -35,10 +36,20 @@ class EmpApp(tk.Tk):
             # the one on the top of the stacking order
             # will be the one that is visible.
             frame.grid(row=0, column=0, sticky="nsew")
+        
         self.show_frame("LoginPage")
+        
+    def validateLogin(self):
+        pass
+    
     def show_frame(self, page_name):
         '''Show a frame for the given page name'''
         frame = self.frames[page_name]
+        
+        if page_name != 'LoginPage':
+            frame.logoutBtn = tk.Button(frame, text="Logout", command= lambda: self.show_frame("LoginPage"))
+            frame.logoutBtn.pack()
+            frame.logoutBtn.place(x=750,y=0)
         frame.tkraise()
 
 class LoginPage(tk.Frame):
@@ -69,6 +80,7 @@ class LoginPage(tk.Frame):
         self.password_label.place(x=50, y=80)
         self.password_entry.place(x=180, y=80)
         self.login_button.place(x=250, y=125)
+        
 
     def validateLogin(self):
 
@@ -118,11 +130,6 @@ class home_page(tk.Frame):
                                command= lambda: controller.show_frame("add_employee_page"))
         self.addEmpBtn.pack()
 
-        self.logoutBtn = tk.Button(self, text="Logout",
-                               command= lambda: controller.show_frame("LoginPage"))
-        self.logoutBtn.pack()
-        self.logoutBtn.place(x=750,y=0)
-        
 
 
 
@@ -153,11 +160,6 @@ class payroll_info_page(tk.Frame):
         self.direct_deposit_btn = Radiobutton(self, text="Direct Deposit", variable=self.capital_one, value="Direct Deposit", font=('Arial', 16))
         self.check_btn = Radiobutton(self, text="Check", variable=self.capital_one, value="Check", font=('Arial', 16))
 
-        self.logoutBtn = tk.Button(self, text="Logout",
-                               command= lambda: controller.show_frame("LoginPage"))
-        
-        self.logoutBtn.pack()
-        self.logoutBtn.place(x=750,y=0)
         self.home.place(x=700,y=0)
         self.routing_number_label.place(x=50, y=100)
         self.routing_number_entry.place(x=220, y=100)
@@ -178,10 +180,6 @@ class profile_page(tk.Frame):
                                command= lambda: controller.show_frame("home_page"))
         self.home.pack()
         
-        self.logoutBtn = tk.Button(self, text="Logout",
-                               command= lambda: controller.show_frame("LoginPage"))
-        self.logoutBtn.pack()
-        self.logoutBtn.place(x=750,y=0)
         self.home.place(x=700,y=0)
 
 class employee_directory_page(tk.Frame):
@@ -193,10 +191,7 @@ class employee_directory_page(tk.Frame):
         self.home = tk.Button(self, text="Home",
                                command= lambda: controller.show_frame("home_page"))
         self.home.pack()
-        self.logoutBtn = tk.Button(self, text="Logout",
-                               command= lambda: controller.show_frame("LoginPage"))
-        self.logoutBtn.pack()
-        self.logoutBtn.place(x=750,y=0)
+
         self.home.place(x=700,y=0)
 
 class add_employee_page(tk.Frame):
@@ -210,9 +205,5 @@ class add_employee_page(tk.Frame):
         self.home.pack()
         self.sumbitBnt = tk.Button(self, text="Submit")
         self.sumbitBnt.pack()
-        self.logoutBtn = tk.Button(self, text="Logout",
-                               command= lambda: controller.show_frame("LoginPage"))
-        self.logoutBtn.pack()
-        self.logoutBtn.place(x=750,y=0)
 
 
