@@ -4,10 +4,11 @@ how to save between runs '''
 import Employee
 # an employee must include:
 class Fake_employee:
-    def __init__(self, username, password, ID):
+    def __init__(self, username, password, ID, permission):
         self.username = username
         self.password = password
         self.ID = ID
+        self._permission = permission
 
         
 class Database:
