@@ -28,7 +28,7 @@ class EmpApp(tk.Tk):
         container.grid_columnconfigure(0, weight=1, minsize = 1000)
         self.resizable(False, False)
         self.frames = {}
-        for F in (LoginPage, home_page, payroll_info_page, view_page, employee_directory_page, add_employee_page):
+        for F in (LoginPage, home_page, view_page, employee_directory_page, add_employee_page):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -51,9 +51,9 @@ class EmpApp(tk.Tk):
             frame.logoutBtn.pack()
             frame.logoutBtn.place(x=950,y=0)
         if page_name != 'LoginPage' and page_name != 'add_employee_page' and page_name != 'home_page':
-            self.home = tk.Button(self, text="Home", command= lambda: self.show_frame("home_page"))
-            self.home.pack()
-            self.home.place(x=900,y=0)
+            frame.home = tk.Button(frame, text="Home", command= lambda: self.show_frame("home_page"))
+            frame.home.pack()
+            frame.home.place(x=900,y=0)
         
         frame.tkraise()
 
@@ -119,13 +119,9 @@ class home_page(tk.Frame):
         label = tk.Label(self, text="Home Page", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
 
-        self.payrollBtn = tk.Button(self, text="Payroll Info",
-                               command= lambda: controller.show_frame("payroll_info_page"))
-        self.payrollBtn.pack()
-
-        self.profileBtn = tk.Button(self, text="Employee Info",
+        self.emp_view = tk.Button(self, text="Employee Info",
                                command= lambda: controller.show_frame("view_page"))
-        self.profileBtn.pack()
+        self.emp_view.pack()
 
         self.employeeDirBtn = tk.Button(self, text="Employee Directory",
                                command= lambda: controller.show_frame("employee_directory_page"))
@@ -135,37 +131,6 @@ class home_page(tk.Frame):
                                command= lambda: controller.show_frame("add_employee_page"))
         self.addEmpBtn.pack()
 
-
-
-class payroll_info_page(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        self.controller = controller
-        label = tk.Label(self, text="Payroll Page", font=controller.title_font)
-        label.pack(side="top", fill="x", pady=10)
-        
-        self.routing_number_label = tk.Label(self, text="Routing Number:", font=('Arial', 16))
-        self.routing_number_entry = tk.Entry(self, font=('Arial', 16))
-        
-        self.account_number_label = tk.Label(self, text="Account Number:", font=('Arial', 16))
-        self.account_number_entry = tk.Entry(self, font=('Arial', 16))
-    
-        self.payment_method_label = tk.Label(self, text="Payment Method:", font=('Arial', 16))
-        
-        # Initialize all checkbox's to have no value
-        self.capital_one=StringVar()
-        self.capital_one.set("hellow")
-        #create checkbox with variable capital_one
-        self.direct_deposit_btn = Radiobutton(self, text="Direct Deposit", variable=self.capital_one, value="Direct Deposit", font=('Arial', 16))
-        self.check_btn = Radiobutton(self, text="Check", variable=self.capital_one, value="Check", font=('Arial', 16))
-
-        self.routing_number_label.place(x=50, y=100)
-        self.routing_number_entry.place(x=220, y=100)
-        self.account_number_label.place(x=50, y=150)
-        self.account_number_entry.place(x=220, y=150)
-        self.payment_method_label.place(x=50,y=200)
-        self.direct_deposit_btn.place(x=220,y=200)
-        self.check_btn.place(x=400,y=200)
 
 class view_page(tk.Frame):
     def __init__(self, parent, controller):
