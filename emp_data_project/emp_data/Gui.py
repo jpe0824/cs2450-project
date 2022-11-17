@@ -99,7 +99,7 @@ class LoginPage(tk.Frame):
                 if testDataBase[self.employee][1] != 'admin':                      
                     self.controller.frames['home_page'].addEmpBtn.pack_forget()       # removes 'Add Employee Button' when user doesn't have admin privileges. 
                 elif testDataBase[self.employee][1] == 'admin':
-                    self.controller.frames['home_page'].addEmpBtn.pack()          # relitialize home page to include 'Add Employee Button' when user has admin privilege.
+                    self.controller.frames['home_page'].addEmpBtn.pack()        # relitialize home page to include 'Add Employee Button' when user has admin privilege.
                 self.controller.show_frame("home_page")                  # calls show_frame from class EmpApp to change the frame to home_page
            else:
                self.password_entry.delete(0, END)                            
@@ -118,6 +118,10 @@ class home_page(tk.Frame):
         label = tk.Label(self, text="Home Page", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
 
+        self.addEmpBtn = tk.Button(self, text="Add New Employee",
+                               command= lambda: controller.show_frame("add_employee_page"))
+        self.addEmpBtn.pack(side='left')
+        
         view_frame = LabelFrame(self, border=True) ################################# !!! REMINDER !!! -> Remove border when done formatting
         view_frame.pack(fill='x')
 
@@ -125,9 +129,6 @@ class home_page(tk.Frame):
         #                        command= lambda: controller.show_frame("employee_directory_page"))
         # self.employeeDirBtn.grid(column=0)
 
-        self.addEmpBtn = tk.Button(view_frame, text="Add New Employee",
-                               command= lambda: controller.show_frame("add_employee_page"))
-        self.addEmpBtn.grid(column=0)
         
         self.emp_ID_label = tk.Label(view_frame, justify='right', text="Employee ID:", font=('Arial', 10))
         self.emp_ID_entry = tk.Entry(view_frame, font=('Arial', 10), state=DISABLED)
@@ -149,6 +150,7 @@ class home_page(tk.Frame):
         clicked = StringVar()
         clicked.set("- Select -")
         self.classification_dropdown = OptionMenu(view_frame, clicked, "- Select -", "Salaried", "Commission", "Hourly")
+        self.classification_dropdown.configure(state='disabled')
         
         
         
@@ -177,6 +179,7 @@ class home_page(tk.Frame):
         payment_method_clicked = StringVar()
         payment_method_clicked.set("- Select -")
         self.payment_method_dropdown = OptionMenu(view_frame, payment_method_clicked, "- Select -", "Direct Deposit", "Mail")
+        self.payment_method_dropdown.configure(state='disabled')
         
         
         self.permission_level_label = tk.Label(view_frame, justify='right', text="Permission Level:", font=('Arial', 10))
