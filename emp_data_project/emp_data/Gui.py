@@ -3,6 +3,7 @@
 import tkinter as tk
 from tkinter import *
 from tkinter import messagebox
+from tkinter.messagebox import askyesno
 from tkinter import font  as tkfont
 
 
@@ -18,6 +19,7 @@ testDataBase = {
 class EmpApp(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
+        self.edit_employee = False
         self.title_font = tkfont.Font(family='Helvetica', size=18, weight="bold", slant="italic")
         # the container is where we'll stack a bunch of frames
         # on top of each other, then the one we want visible
@@ -38,16 +40,21 @@ class EmpApp(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
         
         self.show_frame("LoginPage")
-        
-    def validateLogin(self):
-        pass
+    
+    def logout(self):
+        if self.edit_employee is True:
+            answer = askyesno(title="Warning", message="You have unsaved information, are you sure you want to logout?")
+            if not answer:
+                return 
+            
+        self.show_frame("LoginPage")
     
     def show_frame(self, page_name):
         '''Show a frame for the given page name'''
         frame = self.frames[page_name]
         
         if page_name != 'LoginPage':
-            frame.logoutBtn = tk.Button(frame, text="Logout", command= lambda: self.show_frame("LoginPage"))
+            frame.logoutBtn = tk.Button(frame, text="Logout", command= self.logout)
             frame.logoutBtn.place(x=950,y=0)
         if page_name != 'LoginPage' and page_name != 'add_employee_page' and page_name != 'home_page':
             frame.home = tk.Button(frame, text="Home", command= lambda: self.show_frame("home_page"))
@@ -115,88 +122,126 @@ class home_page(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         self.parent = parent
+        self._state = 'disabled'
         label = tk.Label(self, text="Home Page", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
+        
+        def add_emp():
+            pass
+        
+            
+        def save_edit_emp():
+            self.controller.frames['home_page'].saveBtn.pack_forget()
+            self.controller.frames['home_page'].cancelBtn.pack_forget()
+            self.controller.frames['home_page'].editEmp.pack()
+            self.controller.edit_employee = False 
+            parse_entry('disabled')
+        
+        def cancel_edit_emp():
+            self.controller.frames['home_page'].saveBtn.pack_forget()
+            self.controller.frames['home_page'].cancelBtn.pack_forget()
+            self.controller.frames['home_page'].editEmp.pack()
+            self.controller.edit_employee = False  
+            parse_entry('disabled')
 
+        def edit_emp():
+            # self.controller.frames['home_page']._state = 'normal'
+            self.controller.edit_employee = True
+            self.controller.frames['home_page'].saveBtn.pack()
+            self.controller.frames['home_page'].cancelBtn.pack()
+            self.controller.frames['home_page'].editEmp.pack_forget()
+            parse_entry('normal')
+            
+          
+        def parse_entry(state):
+            for widget in self.controller.frames['home_page'].view_frame.winfo_children():  # will parse through all widgets in home page frame
+                if widget.winfo_class() == 'Entry':
+                    widget['state'] = state
+            self.controller.show_frame("home_page")
+            
+            
+            
+                
+            
         self.addEmpBtn = tk.Button(self, text="Add New Employee",
-                               command= lambda: controller.show_frame("add_employee_page"))
+                               command= add_emp)
         self.addEmpBtn.pack(side='left')
         
-        view_frame = LabelFrame(self, border=True) ################################# !!! REMINDER !!! -> Remove border when done formatting
-        view_frame.pack(fill='x')
+        self.editEmp = tk.Button(self, text='Edit Employee', command= edit_emp)
+        self.editEmp.pack(side='left')
+        
+        self.saveBtn = tk.Button(self, text='Save', command=save_edit_emp)
+        
+        self.cancelBtn = tk.Button(self, text='Cancel', command=cancel_edit_emp)
+        
+        self.view_frame = LabelFrame(self, border=True) ################################# !!! REMINDER !!! -> Remove border when done formatting
+        self.view_frame.pack(fill='x')
 
-        # self.edit_employee = tk.Button(view_frame, text="Employee Directory",
+        # self.edit_employee = tk.Button(self.view_frame, text="Employee Directory",
         #                        command= lambda: controller.show_frame("employee_directory_page"))
         # self.employeeDirBtn.grid(column=0)
 
         
-        self.emp_ID_label = tk.Label(view_frame, justify='right', text="Employee ID:", font=('Arial', 10))
-        self.emp_ID_entry = tk.Entry(view_frame, font=('Arial', 10), state=DISABLED)
-        self.first_name_label = tk.Label(view_frame, justify='right', text="First Name:", font=('Arial', 10))
-        self.first_name_entry = tk.Entry(view_frame, font=('Arial', 10), state=DISABLED)
-        self.last_name_label = tk.Label(view_frame, justify='right', text="Last Name:", font=('Arial', 10))
-        self.last_name_entry = tk.Entry(view_frame, font=('Arial', 10), state=DISABLED)
-        self.address_label = tk.Label(view_frame, justify='right', text="Address:", font=('Arial', 10))
-        self.address_entry = tk.Entry(view_frame, font=('Arial', 10), state=DISABLED)
-        self.city_label = tk.Label(view_frame, justify='right', text="City:", font=('Arial', 10))
-        self.city_entry = tk.Entry(view_frame, font=('Arial', 10), state=DISABLED)
-        self.state_label = tk.Label(view_frame, justify='right', text="State:", font=('Arial', 10))
-        self.state_entry = tk.Entry(view_frame, font=('Arial', 10), state=DISABLED)
-        self.zip_label = tk.Label(view_frame, justify='right', text="Zip:", font=('Arial', 10))
-        self.zip_entry = tk.Entry(view_frame, font=('Arial', 10), state=DISABLED)
+        self.emp_ID_label = tk.Label(self.view_frame, justify='right', text="Employee ID:", font=('Arial', 10))
+        self.emp_ID_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.first_name_label = tk.Label(self.view_frame, justify='right', text="First Name:", font=('Arial', 10))
+        self.first_name_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.last_name_label = tk.Label(self.view_frame, justify='right', text="Last Name:", font=('Arial', 10))
+        self.last_name_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.address_label = tk.Label(self.view_frame, justify='right', text="Address:", font=('Arial', 10))
+        self.address_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.city_label = tk.Label(self.view_frame, justify='right', text="City:", font=('Arial', 10))
+        self.city_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.state_label = tk.Label(self.view_frame, justify='right', text="State:", font=('Arial', 10))
+        self.state_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.zip_label = tk.Label(self.view_frame, justify='right', text="Zip:", font=('Arial', 10))
+        self.zip_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
         
-        self.classification_label = tk.Label(view_frame, justify='right', text="Classification:", font=('Arial', 10))
+        self.classification_label = tk.Label(self.view_frame, justify='right', text="Classification:", font=('Arial', 10))
         
         clicked = StringVar()
         clicked.set("- Select -")
-        self.classification_dropdown = OptionMenu(view_frame, clicked, "- Select -", "Salaried", "Commission", "Hourly")
-        self.classification_dropdown.configure(state='disabled')
+        self.classification_dropdown = OptionMenu(self.view_frame, clicked, "- Select -", "Salaried", "Commission", "Hourly")
+        self.classification_dropdown.configure(state=self._state)
         
+        self.office_phone_label = tk.Label(self.view_frame, justify='right', text="Office Phone:", font=('Arial', 10))
+        self.office_phone_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.office_email_label = tk.Label(self.view_frame, justify='right', text="Office Email:", font=('Arial', 10))
+        self.office_email_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.personal_phone_label = tk.Label(self.view_frame, justify='right', text="Personal Phone:", font=('Arial', 10))
+        self.personal_phone_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.personal_email_label = tk.Label(self.view_frame, justify='right', text="Personal Email:", font=('Arial', 10))
+        self.personal_email_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.DOB_label = tk.Label(self.view_frame, justify='right', text="Date of Birth:", font=('Arial', 10))
+        self.DOB_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
         
-        
-        
-        self.office_phone_label = tk.Label(view_frame, justify='right', text="Office Phone:", font=('Arial', 10))
-        self.office_phone_entry = tk.Entry(view_frame, font=('Arial', 10), state=DISABLED)
-        self.office_email_label = tk.Label(view_frame, justify='right', text="Office Email:", font=('Arial', 10))
-        self.office_email_entry = tk.Entry(view_frame, font=('Arial', 10), state=DISABLED)
-        self.personal_phone_label = tk.Label(view_frame, justify='right', text="Personal Phone:", font=('Arial', 10))
-        self.personal_phone_entry = tk.Entry(view_frame, font=('Arial', 10), state=DISABLED)
-        self.personal_email_label = tk.Label(view_frame, justify='right', text="Personal Email:", font=('Arial', 10))
-        self.personal_email_entry = tk.Entry(view_frame, font=('Arial', 10), state=DISABLED)
-        self.DOB_label = tk.Label(view_frame, justify='right', text="Date of Birth:", font=('Arial', 10))
-        self.DOB_entry = tk.Entry(view_frame, font=('Arial', 10), state=DISABLED)
-        
-        
-        self.SSN_label = tk.Label(view_frame, justify='right', text="SSN:", font=('Arial', 10))
-        self.SSN_entry = tk.Entry(view_frame, font=('Arial', 10), state=DISABLED)
-        self.routing_number_label = tk.Label(view_frame, justify='right', text="Routing Number:", font=('Arial', 10))
-        self.routing_number_entry = tk.Entry(view_frame, font=('Arial', 10), state=DISABLED)
-        self.account_number_label = tk.Label(view_frame, justify='right', text="Account Number:", font=('Arial', 10))
-        self.account_number_entry = tk.Entry(view_frame, font=('Arial', 10), state=DISABLED)
-        self.payment_method_label = tk.Label(view_frame, justify='right', text="Payment Method:", font=('Arial', 10))
-        
+        self.SSN_label = tk.Label(self.view_frame, justify='right', text="SSN:", font=('Arial', 10))
+        self.SSN_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.routing_number_label = tk.Label(self.view_frame, justify='right', text="Routing Number:", font=('Arial', 10))
+        self.routing_number_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.account_number_label = tk.Label(self.view_frame, justify='right', text="Account Number:", font=('Arial', 10))
+        self.account_number_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.payment_method_label = tk.Label(self.view_frame, justify='right', text="Payment Method:", font=('Arial', 10))
         
         payment_method_clicked = StringVar()
         payment_method_clicked.set("- Select -")
-        self.payment_method_dropdown = OptionMenu(view_frame, payment_method_clicked, "- Select -", "Direct Deposit", "Mail")
-        self.payment_method_dropdown.configure(state='disabled')
+        self.payment_method_dropdown = OptionMenu(self.view_frame, payment_method_clicked, "- Select -", "Direct Deposit", "Mail")
+        self.payment_method_dropdown.configure(state=self._state)
         
-        
-        self.permission_level_label = tk.Label(view_frame, justify='right', text="Permission Level:", font=('Arial', 10))
-        self.permission_level_entry = tk.Entry(view_frame, font=('Arial', 10))
-        self.job_title_label = tk.Label(view_frame, justify='right', text="Job Title:", font=('Arial', 10))
-        self.job_title_entry = tk.Entry(view_frame, font=('Arial', 10))
-        self.job_department_label = tk.Label(view_frame, justify='right', text="Department:", font=('Arial', 10))
-        self.job_department_entry = tk.Entry(view_frame, font=('Arial', 10))
-        self.start_date_label = tk.Label(view_frame, justify='right', text="Start Date:", font=('Arial', 10))
-        self.start_date_entry = tk.Entry(view_frame, font=('Arial', 10))
-        self.end_date_label = tk.Label(view_frame, justify='right', text="End Date:", font=('Arial', 10))
-        self.end_date_entry = tk.Entry(view_frame, font=('Arial', 10))
-        self.employment_status_label = tk.Label(view_frame, justify='right', text="Employment Status:", font=('Arial', 10))
-        self.employment_status_entry = tk.Entry(view_frame, font=('Arial', 10))
-        self.password_label = tk.Label(view_frame, justify='right', text="Password", font=('Arial', 10))
-        self.password_entry = tk.Entry(view_frame, font=('Arial', 10))
-        
+        self.permission_level_label = tk.Label(self.view_frame, justify='right', text="Permission Level:", font=('Arial', 10))
+        self.permission_level_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.job_title_label = tk.Label(self.view_frame, justify='right', text="Job Title:", font=('Arial', 10))
+        self.job_title_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.job_department_label = tk.Label(self.view_frame, justify='right', text="Department:", font=('Arial', 10))
+        self.job_department_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.start_date_label = tk.Label(self.view_frame, justify='right', text="Start Date:", font=('Arial', 10))
+        self.start_date_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.end_date_label = tk.Label(self.view_frame, justify='right', text="End Date:", font=('Arial', 10))
+        self.end_date_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.employment_status_label = tk.Label(self.view_frame, justify='right', text="Employment Status:", font=('Arial', 10))
+        self.employment_status_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
+        self.password_label = tk.Label(self.view_frame, justify='right', text="Password", font=('Arial', 10))
+        self.password_entry = tk.Entry(self.view_frame, font=('Arial', 10), state=self._state)
         
         self.emp_ID_label.grid(column=1, row=1, sticky='E', padx=15, pady=7)
         self.first_name_label.grid(column=1, row=2, sticky='E', padx=15, pady=7)
@@ -211,7 +256,6 @@ class home_page(tk.Frame):
         self.personal_phone_label.grid(column=1, row=11, sticky='E', padx=15, pady=7)
         self.personal_email_label.grid(column=1, row=12, sticky='E', padx=15, pady=7)
         
-        
         self.DOB_label.grid(column=3, row=1, sticky='E', padx=15, pady=7)
         self.SSN_label.grid(column=3, row=2, sticky='E', padx=15, pady=7)
         self.routing_number_label.grid(column=3, row=3, sticky='E', padx=15, pady=7)
@@ -225,7 +269,6 @@ class home_page(tk.Frame):
         self.employment_status_label.grid(column=3, row=11, sticky='E', padx=15, pady=7)
         self.password_label.grid(column=3, row=12, sticky='E', padx=15, pady=7)
         
-  
         self.emp_ID_entry.grid(column=2 , row=1)
         self.first_name_entry.grid(column=2 , row=2)
         self.last_name_entry.grid(column=2 , row=3)
@@ -239,7 +282,6 @@ class home_page(tk.Frame):
         self.personal_phone_entry.grid(column=2 , row=11)
         self.personal_email_entry.grid(column=2 , row=12)
     
-        
         self.DOB_entry.grid(column=4 , row=1)
         self.SSN_entry.grid(column=4 , row=2)
         self.routing_number_entry.grid(column=4 , row=3)
@@ -253,10 +295,6 @@ class home_page(tk.Frame):
         self.employment_status_entry.grid(column=4 , row=11)
         self.password_entry.grid(column=4 , row=12)
 
-
-
-
-        
 
 class employee_directory_page(tk.Frame):
     def __init__(self, parent, controller):
