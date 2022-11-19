@@ -11,6 +11,60 @@ class Fake_employee:
         self._permission = permission
 
         
+class Employee():
+    """
+    Main employee class
+
+    Initialize it with Name SNN Phone email and its classification, after
+    that use the three functions set_address, set_pay and set_job to fill
+    in the rest of the info
+
+    The reason it is split so weird is because you might not necessarily
+    want to put in 100% of someones info at once so its split into three
+    categories
+    """
+
+    def __init__(self, id_num, name, classification, birth_date, ssn, phone,
+                 email, permission, password):
+        """Initializes the employee object with basic data members.
+        """
+        self.id = id_num
+        if self.id is not None:
+            self.id = int(self.id)
+        self.name = name
+        if isinstance(self.name, str):
+            if ' ' in name:
+                split_name = name.split(" ")
+                first_name = split_name[0]
+                last_name = split_name[-1]
+            else:
+                first_name = name
+                last_name = None
+        else:
+            first_name = None
+            last_name = None
+
+        self.first_name = first_name
+        self.last_name = last_name
+        self.address = None
+        self.city = None
+        self.state = None
+        self.zip = None
+        self.classification = classification
+        self.pay_method = None
+        self.birth_date = birth_date
+        self.ssn = ssn
+        self.phone = phone
+        self.email = email
+        self.start_date = None
+        self.end_date = None
+        self.title = None
+        self.dept = None
+        self.permission = permission
+        self.password = password
+
+
+
 class Database:
     def __init__(self):
         self.cur_user = ''

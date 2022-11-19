@@ -1,6 +1,7 @@
 from Gui import *
 from Employee import *
-from Database import *
+# from Database import *
+
 
 
 def main():
