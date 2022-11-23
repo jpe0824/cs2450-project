@@ -4,6 +4,7 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter.messagebox import askyesno
 from tkinter import font  as tkfont
+from tkinter import ttk
 
 # from example_database import *
 from Database import *
@@ -109,7 +110,7 @@ class LoginPage(tk.Frame):
             self.focus() #removes focus on data fields
             
             if self.controller.employee.permission == 'employee':        
-                self.controller.frames['emp_page'].emp_page_entries(employee)
+                self.controller.frames['emp_page'].emp_page_entries(employee, 'employee')
                 self.controller.show_frame("emp_page")               # calls show_frame from class EmpApp to change the frame to emp_page
             elif self.controller.employee.permission == 'admin':
                 self.controller.show_frame("admin_page")          # relitialize home page to include 'Add Employee Button' when user has admin privilege.
@@ -129,6 +130,7 @@ class emp_page(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         self.parent = parent
+        self.priviledge = None
         label = tk.Label(self, text="Home Page", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
         
@@ -170,40 +172,38 @@ class emp_page(tk.Frame):
         
         
         
-    def parse_entry(self, mode, state, ):
+    def parse_entry(self, mode, state):
         if mode == 'save':
-            entryDict = {
-                'Address': self.address_entry.get(),
-                'City': self.city_entry.get(),
-                'State': self.state_entry.get(),
-                'Zip': self.zip_entry.get(),
-                'Phone': self.personal_phone_entry.get(),
-                'Email': self.personal_email_entry.get()
-            }
+            if self.priviledge == 'admin':
+                pass
+            elif self.priviledge == 'employee':
+                entryDict = {
+                    'Address': self.address_entry.get(),
+                    'City': self.city_entry.get(),
+                    'State': self.state_entry.get(),
+                    'Zip': self.zip_entry.get(),
+                    'Phone': self.personal_phone_entry.get(),
+                    'Email': self.personal_email_entry.get()
+                }
             
             
             EmpDat.edit_employee(self.controller.employee.id, list(entryDict.keys()), list(entryDict.values())) 
             
          
         if mode == 'parse':
-            # self.controller.frames['emp_page'].view_frame.children['personal_phone_entry']['state'] = state
-            # self.controller.frames['emp_page'].view_frame.children['personal_email_label']['state'] = state
-            # self.controller.frames['emp_page'].view_frame.children['address_entry']['state'] = state
-            # self.controller.frames['emp_page'].view_frame.children['city_entry']['state'] = state
-            # self.controller.frames['emp_page'].view_frame.children['state_entry']['state'] = state
-            # self.controller.frames['emp_page'].view_frame.children['zip_entry']['state'] = state
-            # self.controller.frames['emp_page'].view_frame.children['state_entry']['state'] = state
 
             for x in self.controller.frames['emp_page'].view_frame.children:  # will parse through all widgets --acts like event handler that updates window when there are changes
-                if x in ('personal_phone_entry', 'personal_email_entry', 'address_entry', 'city_entry', 'state_entry', 'zip_entry', 'state_entry'):
-                    self.view_frame.children[x]['state'] = state        
+                if self.priviledge == 'admin':
+                    if ('entry') in x or self.view_frame.children[x].widgetName ==  "tk_optionMenu":
+                        self.view_frame.children[x]['state'] = state
+                elif self.priviledge == 'employee':
+                    if x in ('personal_phone_entry', 'personal_email_entry', 'address_entry', 'city_entry', 'state_entry', 'zip_entry', 'state_entry'):
+                        self.view_frame.children[x]['state'] = state        
             self.controller.show_frame("emp_page")
             
         self.view_frame.children
-    def emp_page_entries(self, employee):
-        
-        
-
+    def emp_page_entries(self, employee, priviledge):
+        self.priviledge = priviledge
         # self.edit_employee = tk.Button(self.view_frame, text="Employee Directory",
         #                        command= lambda: controller.show_frame("employee_directory_page"))
         # self.employeeDirBtn.grid(column=0)
@@ -432,6 +432,97 @@ class admin_page(tk.Frame):
         # self.addEmpBtn = tk.Button(self.view_frame, text="Add New Employee",
         #                         command= self.add_emp)
         # self.addEmpBtn.grid(column=0, row=0)
+        
+        columns_list = ("emp_ip_column", "first_name_column", "last_name_column", 
+                        "phone_number_column", "email_column", "start_date_column", 
+                        "end_date_column", "classification_column", "title_column",
+                        "deptartment_column")
+    
+        emp_tree = ttk.Treeview(self, columns=columns_list, show='headings')
+        
+        for col in columns_list:
+            emp_tree.column(col, width=120)
+            
+        def treeview_sort_column(treeview, col, reverse):
+            """Sort a treeview column when clicked"""
+            data = [
+                (treeview.set(iid, col), iid)
+                for iid in treeview.get_children('')
+            ]
+            
+            data.sort(reverse=reverse)
+            
+            for index, (sort_val, iid) in enumerate(data):
+                treeview.move(iid, '', index)
+                
+            treeview.heading(
+                col,
+                command=lambda c=col: treeview_sort_column(treeview, c, not reverse)
+            )
+                
+        for col in columns_list:
+            emp_tree.heading(col, 
+                            command=lambda c=col: treeview_sort_column(emp_tree, c, False)
+                            )
+        
+        
+        #create heading
+        # my_tree.heading("#0", text="Label", anchor=W) #text is optional
+        emp_tree.heading("emp_ip_column", text="Employee ID", anchor=W)
+        emp_tree.heading("first_name_column", text="First Name", anchor=W)
+        emp_tree.heading("last_name_column", text="Last Name", anchor=W)
+        emp_tree.heading("phone_number_column", text="Phone Number", anchor=W)
+        emp_tree.heading("email_column", text="Email", anchor=W)
+        emp_tree.heading("start_date_column", text="Start Date", anchor=W)
+        emp_tree.heading("end_date_column", text="End Date", anchor=W)
+        emp_tree.heading("classification_column", text="Classification", anchor=W)
+        emp_tree.heading("title_column", text="Title", anchor=W)
+        emp_tree.heading("deptartment_column", text="Department", anchor=W)
+        
+        
+        #add data
+        # my_tree.insert(parent='', index='end', iid=0, text="Parent", values=("Braden","1","orange chicken"))
+        emp_tree.pack(pady=20)
+        
+        # Iterate through all employees to list them out.
+        global COUNT
+        COUNT = 0
+        for emp in EmpDat.emp_list:
+            if COUNT % 2 == 0:
+                emp_tree.insert('', END, values=(emp.id, emp.first_name,
+                                                    emp.last_name, emp.phone, emp.email,
+                                                    emp.start_date, emp.end_date,
+                                                    str(emp.classification), emp.title, emp.dept),
+                                    tags=("evenrows",))
+            else:
+                emp_tree.insert('', END, values=(emp.id, emp.first_name,
+                                                    emp.last_name, emp.phone, emp.email,
+                                                    emp.start_date, emp.end_date,
+                                                    str(emp.classification), emp.title,
+                                                    emp.dept), tags=("oddrows",))
+            COUNT += 1
+            
+        #########
+        # Binds #
+        #########
+        
+        def selected_employee(event):
+            """Brings up an employee's information in a separate GUI window.
+            Intended to be called with a double-click event handler, so that
+            an employee's info shows up when you click on them.
+            """
+            # Bring up employee information after double-click
+            for selected_emp_idx in emp_tree.selection():
+                emp_data = emp_tree.item(selected_emp_idx)
+                emp_id = emp_data["values"][0]
+                emp = find_employee_by_id(emp_id, EmpDat.emp_list)
+                self.controller.frames['emp_page'].emp_page_entries(emp, 'admin')
+                self.controller.show_frame("emp_page")
+            
+        emp_tree.bind("<Double 1>", selected_employee)
+        emp_tree.pack()
+            
+        
 
 
 class add_employee_page(tk.Frame):

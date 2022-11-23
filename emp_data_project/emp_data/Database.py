@@ -1,7 +1,7 @@
 ''' TO DO: outline database class, attr, methods
 Questions for meeting:
 how to save between runs '''
-import Employee
+# import Employee
 import os
 import csv
 # an employee must include:
