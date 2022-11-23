@@ -5,6 +5,8 @@ from types import CoroutineType
 from abc import ABC
 import os, os.path
 
+
+
 employees = []
 
 PAY_LOGFILE = 'payroll.txt'
@@ -54,7 +56,9 @@ def process_receipts():
                 employee.classification.add_receipt(float(receipt))
 
 class Employee:
-    def __init__(self, password, first_name, last_name, address, city, state, zipcode, classification, payment_method, ssn, start_date, end_date, bank_info, dob, permission, job_title, job_dept, phone, email, rate, salary, comm_rate, emp_id, job_status):
+    def __init__(self, emp_id, first_name, last_name, address, city, state, zipcode, classification, payment_method, 
+                 ssn, start_date, end_date, bank_info, dob, permission, job_title, job_dept, phone, email, rate, 
+                 salary, comm_rate, password, job_status):
         self.emp_id = emp_id
         self.first_name = first_name
         self.last_name = last_name
