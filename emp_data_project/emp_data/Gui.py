@@ -131,6 +131,7 @@ class emp_page(tk.Frame):
         self.controller = controller
         self.parent = parent
         self.priviledge = None
+        self.employee_id = None
         label = tk.Label(self, text="Home Page", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
         
@@ -174,27 +175,59 @@ class emp_page(tk.Frame):
         
     def parse_entry(self, mode, state):
         if mode == 'save':
-            if self.priviledge == 'admin':
-                pass
-            elif self.priviledge == 'employee':
-                entryDict = {
+            entryDict = {
+                    'ID': self.emp_ID_entry.get(),
                     'Address': self.address_entry.get(),
+                    'Name': " ".join([self.first_name_entry.get(), self.last_name_entry.get()]),
                     'City': self.city_entry.get(),
                     'State': self.state_entry.get(),
                     'Zip': self.zip_entry.get(),
                     'Phone': self.personal_phone_entry.get(),
-                    'Email': self.personal_email_entry.get()
+                    'Email': self.personal_email_entry.get(),
+                    'Birth_Date': self.DOB_entry.get(),
+                    'SSN': self.SSN_entry.get(),
+                    'Start_Date': self.start_date_entry.get(),
+                    'End_Date': self.end_date_entry.get(),
+                    'Title': self.job_title_entry.get(),
+                    'Dept': self.job_department_entry.get(),
+                    'Permission': self.permission_level_clicked.get(),
+                    'Password': self.password_entry.get(),
                 }
+            if self.clicked.get() == 'hourly':
+                entryDict['Classification'] = '1'
+            elif self.clicked.get() == 'salary':
+                entryDict['Classification'] = '2'
+            elif self.clicked.get() == 'commissioned':
+                entryDict['Classification'] = '3'
+            if self.payment_method_clicked.get() == 'direct deposit':
+                entryDict['Pay_Method'] = '1'
+            elif self.payment_method_clicked.get() == 'mail':
+                entryDict['Pay_Method'] = '2'
+            
+            # if self.priviledge == 'admin':
+            #     EmpDat.edit_employee(self.controller.employee.id, list(entryDict.keys()), list(entryDict.values())) 
+            # elif self.priviledge == 'employee':
+            #     entryDict = {
+            #         'Address': self.address_entry.get(),
+            #         'City': self.city_entry.get(),
+            #         'State': self.state_entry.get(),
+            #         'Zip': self.zip_entry.get(),
+            #         'Phone': self.personal_phone_entry.get(),
+            #         'Email': self.personal_email_entry.get()
+            #     }
             
             
-            EmpDat.edit_employee(self.controller.employee.id, list(entryDict.keys()), list(entryDict.values())) 
+            
+            EmpDat.edit_employee(self.employee_id, list(entryDict.keys()), list(entryDict.values()))
+            self.parse_entry('parse', 'disabled')
+            
             
          
         if mode == 'parse':
 
             for x in self.controller.frames['emp_page'].view_frame.children:  # will parse through all widgets --acts like event handler that updates window when there are changes
                 if self.priviledge == 'admin':
-                    if ('entry') in x or self.view_frame.children[x].widgetName ==  "tk_optionMenu":
+                    if (('entry') in x or self.view_frame.children[x].widgetName ==  "tk_optionMenu") and (x not in 'emp_id_entry' and x not in 'employment_status_entry'):
                         self.view_frame.children[x]['state'] = state
                 elif self.priviledge == 'employee':
                     if x in ('personal_phone_entry', 'personal_email_entry', 'address_entry', 'city_entry', 'state_entry', 'zip_entry', 'state_entry'):
@@ -204,6 +237,7 @@ class emp_page(tk.Frame):
         self.view_frame.children
     def emp_page_entries(self, employee, priviledge):
         self.priviledge = priviledge
+        self.employee_id = employee.id
         # self.edit_employee = tk.Button(self.view_frame, text="Employee Directory",
         #                        command= lambda: controller.show_frame("employee_directory_page"))
         # self.employeeDirBtn.grid(column=0)
@@ -234,12 +268,8 @@ class emp_page(tk.Frame):
         start_date.set(employee.start_date)
         end_date = StringVar()
         end_date.set(employee.end_date)
-        # bank_info = StringVar()
-        # bank_info.set(employee.bank_info)
         dob = StringVar()
         dob.set(employee.birth_date)
-        permission = StringVar()
-        permission.set(employee.permission)
         job_title = StringVar()
         job_title.set(employee.title)
         job_dept = StringVar()
@@ -255,7 +285,7 @@ class emp_page(tk.Frame):
         routingNum = StringVar()
         accountNum = StringVar()
         
-        if str(employee.pay_method == 1):
+        if str(employee.pay_method) == 'direct deposit':
             routingNum.set(employee.pay_method.route_num)
             accountNum.set(employee.pay_method.account_num)
         else:
@@ -299,41 +329,52 @@ class emp_page(tk.Frame):
         
         self.classification_label = tk.Label(self.view_frame, name='classification_label', justify='right', text="Classification:", font=('Arial', 10))
         
+            
+        def classification_dropdown_func(option):
+                # Show pay amounts, based on classification type:
+            if option == "hourly":
+                self.hourly_label = tk.Label(self.view_frame, name='hourly_label', text="Hourly Rate:", font=('Arial', 10)) 
+                self.hourly_entry = tk.Entry(self.view_frame, name='hourly_entry', state=DISABLED, textvariable=hourly_rate, font=('Arial', 10))
+                self.hourly_label.grid(column=1,row=11, sticky='E', padx=15, pady=7)
+                self.hourly_entry.grid(column=2,row=11)
+                if hasattr(self, 'self.commission_label'): self.commision_label.grid_forget()
+                if hasattr(self, 'self.commission_entry'): self.commision_entry.grid_forget()
+                if hasattr(self, 'self.salary_label'): self.salary_label.grid_forget()
+                if hasattr(self, 'self.salary_entry'): self.salary_entry.grid_forget()
+                
+            # Salary
+            elif option == "salary":
+                self.salary_label = tk.Label(self.view_frame, name='salary_label', text="Salary:", font=('Arial', 10)) 
+                self.salary_entry = tk.Entry(self.view_frame, name='salary_entry', state=DISABLED, textvariable=salary, font=('Arial', 10))
+                self.salary_label.grid(column=1,row=11, sticky='E', padx=15, pady=7)
+                self.salary_entry.grid(column=2,row=11)
+                if hasattr(self, 'self.hourly_label'): self.hourly_label.grid_forget()
+                if hasattr(self, 'self.hourly_entry'): self.hourly_entry.grid_forget()
+                if hasattr(self, 'self.commision_label'): self.commision_label.grid_forget()
+                if hasattr(self, 'self.commision_entry'): self.commision_entry.grid_forget()
+            # Commission
+            elif option == "commissioned":
+                self.salary_label = tk.Label(self.view_frame, name='salary_label', text="Salary:", font=('Arial', 10)) 
+                self.salary_entry = tk.Entry(self.view_frame, name='salary_entry', state=DISABLED, textvariable=salary, font=('Arial', 10))
+                self.commision_label = tk.Label(self.view_frame, name='commision_label', text="Commission Rate:", font=('Arial', 10))
+                self.commision_entry = tk.Entry(self.view_frame, name='commision_entry', state=DISABLED, textvariable=commission, font=('Arial', 10))
+                self.salary_label.grid(column=1,row=11, sticky='E', padx=15, pady=7)
+                self.salary_entry.grid(column=2,row=11)
+                self.commision_label.grid(column=1,row=12, sticky='E', padx=15, pady=7)
+                self.commision_entry.grid(column=2,row=12)
+                if hasattr(self, 'self.hourly_label'): self.hourly_label.grid_forget()
+                if hasattr(self, 'self.hourly_label'): self.hourly_entry.grid_forget()
+                
+        
         self.clicked = StringVar()
         self.clicked.set(str(employee.classification))
-        self.classification_dropdown = OptionMenu(self.view_frame, self.clicked, "- Select -", "salary", "commissioned", "hourly")
+        classification_dropdown_func(str(employee.classification))
+        self.classification_dropdown = OptionMenu(self.view_frame, self.clicked, "- Select -", "salary", "commissioned", "hourly", command= lambda: classification_dropdown_func(self.clicked))
         self.classification_dropdown.configure(state=DISABLED)
         
         
         
-        
-            # Show pay amounts, based on classification type:
-        if str(employee.classification) == "hourly":
-            self.hourly_label = tk.Label(self.view_frame, name='hourly_label', text="Hourly Rate:", font=('Arial', 10)) 
-            self.hourly_entry = tk.Entry(self.view_frame, name='hourly_entry', state=DISABLED, textvariable=hourly_rate, font=('Arial', 10))
-            self.hourly_label.grid(column=1,row=11, sticky='E', padx=15, pady=7)
-            self.hourly_entry.grid(column=2,row=11)
-        # Salary
-        elif str(employee.classification) == "salary":
-            self.salary_label = tk.Label(self.view_frame, name='salary_label', text="Salary:", font=('Arial', 10)) 
-            self.salary_entry = tk.Entry(self.view_frame, name='salary_entry', state=DISABLED, textvariable=salary, font=('Arial', 10))
-            self.salary_label.grid(column=1,row=11, sticky='E', padx=15, pady=7)
-            self.salary_entry.grid(column=2,row=11)
-        # Commission
-        elif str(employee.classification) == "commissioned":
-            self.salary_label = tk.Label(self.view_frame, name='salary_label', text="Salary:", font=('Arial', 10)) 
-            self.salary_entry = tk.Entry(self.view_frame, name='salary_entry', state=DISABLED, textvariable=salary, font=('Arial', 10))
-            self.commision_label = tk.Label(self.view_frame, name='commision_label', text="Commission Rate:", font=('Arial', 10))
-            self.commision_entry = tk.Entry(self.view_frame, name='commision_entry', state=DISABLED, textvariable=commission, font=('Arial', 10))
-            self.salary_label.grid(column=1,row=11, sticky='E', padx=15, pady=7)
-            self.salary_entry.grid(column=2,row=11)
-            self.commision_label.grid(column=1,row=12, sticky='E', padx=15, pady=7)
-            self.commision_entry.grid(column=2,row=12)
-        
-        # self.office_phone_label = tk.Label(self. name='self',view_frame, justify='right', text="Office Phone:", font=('Arial', 10))
-        # self.office_phone_entry = tk.Entry(self. name='self',view_frame, font=('Arial', 10), state=DISABLED, textvariable=phone)
-        # self.office_email_label = tk.Label(self. name='self',view_frame, justify='right', text="Office Email:", font=('Arial', 10))
-        # self.office_email_entry = tk.Entry(self. name='self',view_frame, font=('Arial', 10), state=DISABLED, textvariable=email)
+   
         self.personal_phone_label = tk.Label(self.view_frame, name='personal_phone_label', justify='right', text="Personal Phone:", font=('Arial', 10))
         self.personal_phone_entry = tk.Entry(self.view_frame, name='personal_phone_entry', font=('Arial', 10), state=DISABLED, textvariable=phone)
         self.personal_email_label = tk.Label(self.view_frame, name='personal_email_label', justify='right', text="Personal Email:", font=('Arial', 10))
@@ -355,8 +396,6 @@ class emp_page(tk.Frame):
         self.payment_method_dropdown = OptionMenu(self.view_frame, self.payment_method_clicked, "- Select -", "direct deposit", "mail")
         self.payment_method_dropdown.configure(state=DISABLED)
         
-        self.permission_level_label = tk.Label(self.view_frame, name='permission_level_label', justify='right', text="Permission Level:", font=('Arial', 10))
-        self.permission_level_entry = tk.Entry(self.view_frame, name='permission_level_entry', font=('Arial', 10), state=DISABLED, textvariable=permission)
         self.job_title_label = tk.Label(self.view_frame, name='job_title_label', justify='right', text="Job Title:", font=('Arial', 10))
         self.job_title_entry = tk.Entry(self.view_frame, name='job_title_entry', font=('Arial', 10), state=DISABLED, textvariable=job_title)
         self.job_department_label = tk.Label(self.view_frame, name='job_department_label', justify='right', text="Department:", font=('Arial', 10))
@@ -367,8 +406,14 @@ class emp_page(tk.Frame):
         self.end_date_entry = tk.Entry(self.view_frame, name='end_date_entry', font=('Arial', 10), state=DISABLED, textvariable=end_date)
         self.employment_status_label = tk.Label(self.view_frame, name='employment_status_label', justify='right', text="Employment Status:", font=('Arial', 10))
         self.employment_status_entry = tk.Entry(self.view_frame, name='employment_status_entry', font=('Arial', 10), state=DISABLED, textvariable=job_status)
-        self.password_label = tk.Label(self.view_frame, name='password_label', justify='right', text="Password", font=('Arial', 10))
+        self.password_label = tk.Label(self.view_frame, name='password_label', justify='right', text="Password:", font=('Arial', 10))
         self.password_entry = tk.Entry(self.view_frame, name='password_entry', font=('Arial', 10), state=DISABLED, textvariable=password)
+        self.permission_level_label = tk.Label(self.view_frame, name='permission_level_label', justify='right', text="Permission Level:", font=('Arial', 10))
+        
+        self.permission_level_clicked = StringVar()
+        self.permission_level_clicked.set(employee.permission)
+        self.permission_level_dropdown = OptionMenu(self.view_frame, self.permission_level_clicked, "- Select -", "employee", "admin")
+        self.permission_level_dropdown.configure(state=DISABLED)
         
         self.emp_ID_label.grid(column=1, row=1, sticky='E', padx=15, pady=7)
         self.first_name_label.grid(column=1, row=2, sticky='E', padx=15, pady=7)
@@ -377,24 +422,21 @@ class emp_page(tk.Frame):
         self.city_label.grid(column=1, row=5, sticky='E', padx=15, pady=7)
         self.state_label.grid(column=1, row=6, sticky='E', padx=15, pady=7)
         self.zip_label.grid(column=1, row=7, sticky='E', padx=15, pady=7)
-        # self.office_phone_label.grid(column=1, row=8, sticky='E', padx=15, pady=7)
-        # self.office_email_label.grid(column=1, row=9, sticky='E', padx=15, pady=7)
         self.personal_phone_label.grid(column=1, row=8, sticky='E', padx=15, pady=7)
         self.personal_email_label.grid(column=1, row=9, sticky='E', padx=15, pady=7)
         self.classification_label.grid(column=1, row=10, sticky='E', padx=15, pady=7)
         
         self.DOB_label.grid(column=3, row=1, sticky='E', padx=15, pady=7)
         self.SSN_label.grid(column=3, row=2, sticky='E', padx=15, pady=7)
-        self.routing_number_label.grid(column=3, row=3, sticky='E', padx=15, pady=7)
-        self.account_number_label.grid(column=3, row=4, sticky='E', padx=15, pady=7)
         self.payment_method_label.grid(column=3, row=5, sticky='E', padx=15, pady=7)
-        self.permission_level_label.grid(column=3, row=6, sticky='E', padx=15, pady=7)
         self.job_title_label.grid(column=3, row=7, sticky='E', padx=15, pady=7)
         self.job_department_label.grid(column=3, row=8, sticky='E', padx=15, pady=7)
         self.start_date_label.grid(column=3, row=9, sticky='E', padx=15, pady=7)
         self.end_date_label.grid(column=3, row=10, sticky='E', padx=15, pady=7)
         self.employment_status_label.grid(column=3, row=11, sticky='E', padx=15, pady=7)
-        self.password_label.grid(column=3, row=12, sticky='E', padx=15, pady=7)
+        
+        self.password_label.grid(column=5, row=1, sticky='E', padx=15, pady=7)
+        self.permission_level_label.grid(column=5, row=2, sticky='E', padx=15, pady=7)
         
         self.emp_ID_entry.grid(column=2 , row=1)
         self.first_name_entry.grid(column=2 , row=2)
@@ -403,26 +445,31 @@ class emp_page(tk.Frame):
         self.city_entry.grid(column=2 , row=5)
         self.state_entry.grid(column=2 , row=6)
         self.zip_entry.grid(column=2 , row=7)
-        # self.office_phone_entry.grid(column=2 , row=8)
-        # self.office_email_entry.grid(column=2 , row=9)
         self.personal_phone_entry.grid(column=2 , row=8)
         self.personal_email_entry.grid(column=2 , row=9)
         self.classification_dropdown.grid(column=2 , row=10)
     
         self.DOB_entry.grid(column=4 , row=1)
         self.SSN_entry.grid(column=4 , row=2)
-        self.routing_number_entry.grid(column=4 , row=3)
-        self.account_number_entry.grid(column=4 , row=4)
         self.payment_method_dropdown.grid(column=4 , row=5)
-        self.permission_level_entry.grid(column=4 , row=6)
         self.job_title_entry.grid(column=4 , row=7)
         self.job_department_entry.grid(column=4 , row=8)
         self.start_date_entry.grid(column=4 , row=9)
         self.end_date_entry.grid(column=4 , row=10)
         self.employment_status_entry.grid(column=4 , row=11)
-        self.password_entry.grid(column=4 , row=12)
+        
+        self.password_entry.grid(column=6 , row=1)
+        self.permission_level_dropdown.grid(column=6 , row=2)
 
+        if str(employee.pay_method) == 'direct deposit':
+            self.routing_number_label.grid(column=3, row=3, sticky='E', padx=15, pady=7)
+            self.account_number_label.grid(column=3, row=4, sticky='E', padx=15, pady=7)
+            self.routing_number_entry.grid(column=4 , row=3)
+            self.account_number_entry.grid(column=4 , row=4)
+            
 class admin_page(tk.Frame):
+    
+    
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
@@ -516,9 +563,8 @@ class admin_page(tk.Frame):
                 emp_data = emp_tree.item(selected_emp_idx)
                 emp_id = emp_data["values"][0]
                 emp = find_employee_by_id(emp_id, EmpDat.emp_list)
-                self.controller.frames['emp_page'].emp_page_entries(emp, 'admin')
-                self.controller.show_frame("emp_page")
-            
+            self.controller.frames['emp_page'].emp_page_entries(emp, 'admin')
+            self.controller.show_frame("emp_page")          
         emp_tree.bind("<Double 1>", selected_employee)
         emp_tree.pack()
             

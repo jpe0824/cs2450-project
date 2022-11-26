@@ -6,6 +6,7 @@ from Employee import *
 
 def main():
     app = EmpApp()
+    app.after(1000, app.frames['emp_page'].emp_page_entries)
     app.mainloop()
 
 
