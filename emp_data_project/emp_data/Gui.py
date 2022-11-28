@@ -329,47 +329,46 @@ class emp_page(tk.Frame):
         
         self.classification_label = tk.Label(self.view_frame, name='classification_label', justify='right', text="Classification:", font=('Arial', 10))
         
-            
-        def classification_dropdown_func(option):
+        self.hourly_label = tk.Label(self.view_frame, name='hourly_label', text="Hourly Rate:", font=('Arial', 10)) 
+        self.hourly_entry = tk.Entry(self.view_frame, name='hourly_entry', state=DISABLED, textvariable=hourly_rate, font=('Arial', 10))
+        self.salary_label = tk.Label(self.view_frame, name='salary_label', text="Salary:", font=('Arial', 10)) 
+        self.salary_entry = tk.Entry(self.view_frame, name='salary_entry', state=DISABLED, textvariable=salary, font=('Arial', 10))
+        self.commission_label = tk.Label(self.view_frame, name='commision_label', text="Commission Rate:", font=('Arial', 10))
+        self.commission_entry = tk.Entry(self.view_frame, name='commision_entry', state=DISABLED, textvariable=commission, font=('Arial', 10))
+        
+        def classification_dropdown_func(*args):
+            print(f"the variable has changed to '{self.clicked.get()}'")
                 # Show pay amounts, based on classification type:
-            if option == "hourly":
-                self.hourly_label = tk.Label(self.view_frame, name='hourly_label', text="Hourly Rate:", font=('Arial', 10)) 
-                self.hourly_entry = tk.Entry(self.view_frame, name='hourly_entry', state=DISABLED, textvariable=hourly_rate, font=('Arial', 10))
+            if self.clicked.get() == "hourly":
                 self.hourly_label.grid(column=1,row=11, sticky='E', padx=15, pady=7)
                 self.hourly_entry.grid(column=2,row=11)
-                if hasattr(self, 'self.commission_label'): self.commision_label.grid_forget()
-                if hasattr(self, 'self.commission_entry'): self.commision_entry.grid_forget()
-                if hasattr(self, 'self.salary_label'): self.salary_label.grid_forget()
-                if hasattr(self, 'self.salary_entry'): self.salary_entry.grid_forget()
+                self.commission_label.grid_forget()
+                self.commission_entry.grid_forget()
+                self.salary_label.grid_forget()
+                self.salary_label.grid_forget()
                 
             # Salary
-            elif option == "salary":
-                self.salary_label = tk.Label(self.view_frame, name='salary_label', text="Salary:", font=('Arial', 10)) 
-                self.salary_entry = tk.Entry(self.view_frame, name='salary_entry', state=DISABLED, textvariable=salary, font=('Arial', 10))
+            elif self.clicked.get() == "salary":
                 self.salary_label.grid(column=1,row=11, sticky='E', padx=15, pady=7)
                 self.salary_entry.grid(column=2,row=11)
-                if hasattr(self, 'self.hourly_label'): self.hourly_label.grid_forget()
-                if hasattr(self, 'self.hourly_entry'): self.hourly_entry.grid_forget()
-                if hasattr(self, 'self.commision_label'): self.commision_label.grid_forget()
-                if hasattr(self, 'self.commision_entry'): self.commision_entry.grid_forget()
+                self.hourly_label.grid_forget()
+                self.hourly_entry.grid_forget()
+                self.commission_label.grid_forget()
+                self.commission_entry.grid_forget()
             # Commission
-            elif option == "commissioned":
-                self.salary_label = tk.Label(self.view_frame, name='salary_label', text="Salary:", font=('Arial', 10)) 
-                self.salary_entry = tk.Entry(self.view_frame, name='salary_entry', state=DISABLED, textvariable=salary, font=('Arial', 10))
-                self.commision_label = tk.Label(self.view_frame, name='commision_label', text="Commission Rate:", font=('Arial', 10))
-                self.commision_entry = tk.Entry(self.view_frame, name='commision_entry', state=DISABLED, textvariable=commission, font=('Arial', 10))
+            elif self.clicked.get() == "commissioned":
                 self.salary_label.grid(column=1,row=11, sticky='E', padx=15, pady=7)
                 self.salary_entry.grid(column=2,row=11)
-                self.commision_label.grid(column=1,row=12, sticky='E', padx=15, pady=7)
-                self.commision_entry.grid(column=2,row=12)
-                if hasattr(self, 'self.hourly_label'): self.hourly_label.grid_forget()
-                if hasattr(self, 'self.hourly_label'): self.hourly_entry.grid_forget()
+                self.commission_label.grid(column=1,row=12, sticky='E', padx=15, pady=7)
+                self.commission_entry.grid(column=2,row=12)
+                self.hourly_label.grid_forget()
+                self.hourly_entry.grid_forget()
                 
         
         self.clicked = StringVar()
+        self.clicked.trace('w', classification_dropdown_func)
         self.clicked.set(str(employee.classification))
-        classification_dropdown_func(str(employee.classification))
-        self.classification_dropdown = OptionMenu(self.view_frame, self.clicked, "- Select -", "salary", "commissioned", "hourly", command= lambda: classification_dropdown_func(self.clicked))
+        self.classification_dropdown = OptionMenu(self.view_frame, self.clicked, "- Select -", "hourly", "salary", "commissioned")
         self.classification_dropdown.configure(state=DISABLED)
         
         
@@ -567,9 +566,6 @@ class admin_page(tk.Frame):
             self.controller.show_frame("emp_page")          
         emp_tree.bind("<Double 1>", selected_employee)
         emp_tree.pack()
-            
-        
-
 
 class add_employee_page(tk.Frame):
     def __init__(self, parent, controller):
