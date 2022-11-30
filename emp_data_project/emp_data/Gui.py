@@ -191,11 +191,11 @@ class emp_page(tk.Frame):
                     'Permission': self.permission_level_clicked.get(),
                     'Password': self.password_entry.get(),
                 }
-            if self.clicked.get() == 'hourly':
+            if self.classification_clicked.get() == 'hourly':
                 entryDict['Classification'] = '1'
-            elif self.clicked.get() == 'salary':
+            elif self.classification_clicked.get() == 'salary':
                 entryDict['Classification'] = '2'
-            elif self.clicked.get() == 'commissioned':
+            elif self.classification_clicked.get() == 'commissioned':
                 entryDict['Classification'] = '3'
             if self.payment_method_clicked.get() == 'direct deposit':
                 entryDict['Pay_Method'] = '1'
@@ -232,12 +232,15 @@ class emp_page(tk.Frame):
             self.controller.show_frame("emp_page")
             
         elif mode == 'cancel':
-            # self.emp_page_entries(self.employee_selected)
-            self.clicked.set(str(self.employee_selected.classification))
-            self.controller.frames['emp_page'].emp_page_entries(self.employee_selected)
-            self.controller.show_frame("emp_page")
+            self.emp_page_entries(self.employee_selected, 'cancel')
+            self.classification_clicked.set(str(self.employee_selected.classification))
+            self.payment_method_clicked.set(str(self.employee_selected.pay_method))
+            self.permission_level_clicked.set(self.employee_selected.permission)
+            # self.parse_entry('parse', 'disabled')
+            # self.controller.frames['emp_page'].emp_page_entries(self.employee_selected)
+            # self.controller.show_frame("emp_page")
             
-    def emp_page_entries(self, employee):
+    def emp_page_entries(self, employee, mode = None):
         self.employee_selected = employee
         
         var = StringVar()
@@ -335,9 +338,9 @@ class emp_page(tk.Frame):
         self.commission_entry = tk.Entry(self.view_frame, name='commision_entry', state=DISABLED, textvariable=commission, font=('Arial', 10))
         
         def classification_dropdown_func(*args):
-            print(f"the variable has changed to '{self.clicked.get()}'")
+            print(f"the variable has changed to '{self.classification_clicked.get()}'")
                 # Show pay amounts, based on classification type:
-            if self.clicked.get() == "hourly":
+            if self.classification_clicked.get() == "hourly":
                 self.hourly_label.grid(column=1,row=11, sticky='E', padx=15, pady=7)
                 self.hourly_entry.grid(column=2,row=11)
                 self.commission_label.grid_forget()
@@ -346,7 +349,7 @@ class emp_page(tk.Frame):
                 self.salary_label.grid_forget()
                 
             # Salary
-            elif self.clicked.get() == "salary":
+            elif self.classification_clicked.get() == "salary":
                 self.salary_label.grid(column=1,row=11, sticky='E', padx=15, pady=7)
                 self.salary_entry.grid(column=2,row=11)
                 self.hourly_label.grid_forget()
@@ -354,7 +357,7 @@ class emp_page(tk.Frame):
                 self.commission_label.grid_forget()
                 self.commission_entry.grid_forget()
             # Commission
-            elif self.clicked.get() == "commissioned":
+            elif self.classification_clicked.get() == "commissioned":
                 self.salary_label.grid(column=1,row=11, sticky='E', padx=15, pady=7)
                 self.salary_entry.grid(column=2,row=11)
                 self.commission_label.grid(column=1,row=12, sticky='E', padx=15, pady=7)
@@ -364,12 +367,23 @@ class emp_page(tk.Frame):
                 
             # self.controller.show_frame("emp_page")
                 
-        
-        self.clicked = StringVar()
-        self.clicked.trace('w', classification_dropdown_func)
-        self.clicked.set(str(employee.classification))
-        self.classification_dropdown = OptionMenu(self.view_frame, self.clicked, "- Select -", "hourly", "salary", "commissioned")
+        if mode != 'cancel':
+            self.classification_clicked = StringVar()
+            self.classification_clicked.trace('w', classification_dropdown_func)
+            self.classification_clicked.set(str(employee.classification))
+            self.classification_dropdown = OptionMenu(self.view_frame, self.classification_clicked, "- Select -", "hourly", "salary", "commissioned")
+            
+            self.payment_method_clicked = StringVar()
+            self.payment_method_clicked.set(str(employee.pay_method))
+            self.payment_method_dropdown = OptionMenu(self.view_frame, self.payment_method_clicked, "- Select -", "direct deposit", "mail")
+
+            self.permission_level_clicked = StringVar()
+            self.permission_level_clicked.set(employee.permission)
+            self.permission_level_dropdown = OptionMenu(self.view_frame, self.permission_level_clicked, "- Select -", "employee", "admin")
+            
         self.classification_dropdown.configure(state=DISABLED)
+        self.payment_method_dropdown.configure(state=DISABLED)
+        self.permission_level_dropdown.configure(state=DISABLED)
         
         
    
@@ -389,11 +403,6 @@ class emp_page(tk.Frame):
         self.account_number_entry = tk.Entry(self.view_frame, name='account_number_entry', font=('Arial', 10), state=DISABLED, textvariable=accountNum)
         self.payment_method_label = tk.Label(self.view_frame, name='payment_method_label', justify='right', text="Payment Method:", font=('Arial', 10))
         
-        self.payment_method_clicked = StringVar()
-        self.payment_method_clicked.set(str(employee.pay_method))
-        self.payment_method_dropdown = OptionMenu(self.view_frame, self.payment_method_clicked, "- Select -", "direct deposit", "mail")
-        self.payment_method_dropdown.configure(state=DISABLED)
-        
         self.job_title_label = tk.Label(self.view_frame, name='job_title_label', justify='right', text="Job Title:", font=('Arial', 10))
         self.job_title_entry = tk.Entry(self.view_frame, name='job_title_entry', font=('Arial', 10), state=DISABLED, textvariable=job_title)
         self.job_department_label = tk.Label(self.view_frame, name='job_department_label', justify='right', text="Department:", font=('Arial', 10))
@@ -408,10 +417,6 @@ class emp_page(tk.Frame):
         self.password_entry = tk.Entry(self.view_frame, name='password_entry', font=('Arial', 10), state=DISABLED, textvariable=password)
         self.permission_level_label = tk.Label(self.view_frame, name='permission_level_label', justify='right', text="Permission Level:", font=('Arial', 10))
         
-        self.permission_level_clicked = StringVar()
-        self.permission_level_clicked.set(employee.permission)
-        self.permission_level_dropdown = OptionMenu(self.view_frame, self.permission_level_clicked, "- Select -", "employee", "admin")
-        self.permission_level_dropdown.configure(state=DISABLED)
         
         self.emp_ID_label.grid(column=1, row=1, sticky='E', padx=15, pady=7)
         self.first_name_label.grid(column=1, row=2, sticky='E', padx=15, pady=7)
