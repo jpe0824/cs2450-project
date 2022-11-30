@@ -489,7 +489,7 @@ class EmployeeDB:
         else:
             self.admins = open("emp_data_project/emp_data/admins.csv", encoding="utf8")
 
-        if not os.path.exists("archived.csv"):
+        if not os.path.exists("emp_data_project/emp_data/archived.csv"):
             with open("emp_data_project/emp_data/archived.csv", "x", encoding="utf8") as database:
                 writer = csv.writer(database)
                 writer.writerow(
@@ -506,6 +506,9 @@ class EmployeeDB:
         self.update_emp_list()
         
     def update_emp_list(self):
+        self.unusedIdList = []
+        for i in range(999999):
+            self.unusedIdList.append(i)
         """
         Pulls data from the CSV to the emp list and archived emp list.
         """
@@ -515,6 +518,7 @@ class EmployeeDB:
                                 None)
             temp_emp.populate_from_row(row)
             temp_emp.job_status = 'unactive'
+            self.unusedIdList.append(temp_emp.id)
             self.archived_list.append(temp_emp)
         emp_dict = csv.DictReader(self.database)
         for row in emp_dict:
@@ -523,6 +527,7 @@ class EmployeeDB:
             temp_emp.populate_from_row(row)
             if temp_emp not in self.archived_list:
                 temp_emp.job_status = 'active'
+                self.unusedIdList.remove(temp_emp.id)
                 self.emp_list.append(temp_emp)
                 
     def archive_employee(self, id_num):
@@ -532,7 +537,8 @@ class EmployeeDB:
         employee.job_status = 'unactive'
         self.emp_list.remove(employee)
         self.archived_list.append(employee)
-        _add_row(employee, "archived.csv")
+        self.unusedIdList.append(id_num)
+        _add_row(employee, "emp_data_project/emp_data/archived.csv")
 
 
     def add_employee(self, employee: Employee):
@@ -602,71 +608,53 @@ class EmployeeDB:
 def _add_row(employee: Employee, file):
     with open(file, "a", encoding="utf8") as database:
         writer = csv.writer(database, delimiter=',')
-        if str(employee.classification) == "hourly":
-            if str(employee.pay_method) == "direct deposit":
-                writer.writerow([employee.id, employee.name, employee.address,
+        classList = [
+            #if employee is hourly & direct deposit
+            [-1,
+             employee.classification.hourly_rate, -1,
+             employee.pay_method.route_num,
+             employee.pay_method.account_num],
+            #if employee is hourly & mail
+            [-1,
+             employee.classification.hourly_rate, -1, -1, -1],
+            #if employee is salary & direct deposit
+            [employee.classification.salary, -1, -1, 
+             employee.pay_method.route_num,
+             employee.pay_method.account_num],
+            #if employee is salary & mail
+            [employee.classification.salary, -1, -1, -1, -1],
+            #if employee is comissioned & direct deposit
+            [employee.classification.salary, -1,
+            employee.classification.commission_rate,
+            employee.pay_method.route_num,
+            employee.pay_method.account_num],
+            #if employee is comissioned & mail
+            [employee.classification.salary, -1,
+             employee.classification.commission_rate, -1, -1]
+        ]
+        if str(employee.classification) == "hourly" and str(employee.pay_method) == "direct deposit":
+            var = classList[0]
+        elif str(employee.classification) == "hourly" and str(employee.pay_method) == "mail":
+            var = classList[1]
+        elif str(employee.classification) == "salary" and str(employee.pay_method) == "direct deposit":
+            var = classList[2]
+        elif str(employee.classification) == "salary" and str(employee.pay_method) == "mail":
+            var = classList[3]
+        elif str(employee.classification) == "commissioned" and str(employee.pay_method) == "direct deposit":
+            var = classList[4]
+        elif str(employee.classification) == "commissioned" and str(employee.pay_method) == "mail":
+            var = classList[5]
+        
+            var = classList[1]
+        writer.writerow([employee.id, employee.name, employee.address,
                                  employee.city, employee.state, employee.zip,
                                  employee.classification.num(),
-                                 employee.pay_method.num(), -1,
-                                 employee.classification.hourly_rate, -1,
-                                 employee.pay_method.route_num,
-                                 employee.pay_method.account_num, employee.birth_date,
+                                 employee.pay_method.num(),var,
                                  employee.ssn, employee.phone, employee.email, employee.start_date,
                                  employee.end_date, employee.title, employee.dept,
                                  employee.permission, employee.password])
-            elif str(employee.pay_method) == "mail":
-                writer.writerow([employee.id, employee.name, employee.address,
-                                 employee.city, employee.state, employee.zip,
-                                 employee.classification.num(),
-                                 employee.pay_method.num(), -1,
-                                 employee.classification.hourly_rate, -1, -1, -1,
-                                 employee.birth_date, employee.ssn, employee.phone, employee.email,
-                                 employee.start_date, employee.end_date, employee.title,
-                                 employee.dept, employee.permission, employee.password])
-        elif str(employee.classification) == "salary":
-            if str(employee.pay_method) == "direct deposit":
-                writer.writerow([employee.id, employee.name, employee.address,
-                                 employee.city, employee.state, employee.zip,
-                                 employee.classification.num(),
-                                 employee.pay_method.num(),
-                                 employee.classification.salary, -1, -1,
-                                 employee.pay_method.route_num,
-                                 employee.pay_method.account_num, employee.birth_date,
-                                 employee.ssn, employee.phone, employee.email, employee.start_date,
-                                 employee.end_date, employee.title, employee.dept,
-                                 employee.permission, employee.password])
-            elif str(employee.pay_method) == "mail":
-                writer.writerow([employee.id, employee.name, employee.address,
-                                 employee.city, employee.state, employee.zip,
-                                 employee.classification.num(),
-                                 employee.pay_method.num(),
-                                 employee.classification.salary, -1, -1, -1, -1,
-                                 employee.birth_date, employee.ssn, employee.phone, employee.email,
-                                 employee.start_date, employee.end_date, employee.title,
-                                 employee.dept, employee.permission, employee.password])
-        elif str(employee.classification) == "commissioned":
-            if str(employee.pay_method) == "direct deposit":
-                writer.writerow([employee.id, employee.name, employee.address,
-                                 employee.city, employee.state, employee.zip,
-                                 employee.classification.num(),
-                                 employee.pay_method.num(),
-                                 employee.classification.salary, -1,
-                                 employee.classification.commission_rate,
-                                 employee.pay_method.route_num,
-                                 employee.pay_method.account_num, employee.birth_date,
-                                 employee.ssn, employee.phone, employee.email, employee.start_date,
-                                 employee.end_date, employee.title, employee.dept,
-                                 employee.permission, employee.password])
-            elif str(employee.pay_method) == "mail":
-                writer.writerow([employee.id, employee.name, employee.address,
-                                 employee.city, employee.state, employee.zip,
-                                 employee.classification.num(),
-                                 employee.pay_method.num(),
-                                 employee.classification.salary, -1,
-                                 employee.classification.commission_rate, -1, -1,
-                                 employee.birth_date, employee.ssn, employee.phone, employee.email,
-                                 employee.start_date, employee.end_date, employee.title,
-                                 employee.dept, employee.permission, employee.password])
+      
+           
 
 
 def add_new_employee(emp_db: EmployeeDB, id_num, first_name, last_name,
@@ -686,6 +674,11 @@ def add_new_employee(emp_db: EmployeeDB, id_num, first_name, last_name,
     employee.set_pay_method(pay_method_num, route_num, account_num)
 
     emp_db.add_employee(employee)
+
+# def add_new_employee():
+#     field_names = ['ID','Name','Address','City','State','Zip','Classification','Pay_Method','Salary','Hourly','Commission','Route','Account','Birth_Date','SSN','Phone','Email','Start_Date','End_Date','Title','Dept','Permission','Password']
+#     temp_dict = Employee(None, None, None, None, None, None, None, None, None)
+#     with open()
 
 
 def open_file(the_file):

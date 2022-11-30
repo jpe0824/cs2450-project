@@ -4,6 +4,8 @@ from tkinter import messagebox
 from tkinter.messagebox import askyesno
 from tkinter import font  as tkfont
 from tkinter import ttk
+# from PIL import Image, ImageTk
+import uuid
 
 # from example_database import *
 from Database import *
@@ -129,6 +131,7 @@ class emp_page(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         self.parent = parent
+        self.mode = None
         self.employee_id = None
         label = tk.Label(self, text="Home Page", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
@@ -137,15 +140,21 @@ class emp_page(tk.Frame):
         self.view_frame.pack(fill='x')
         
         self.editEmp = tk.Button(self.view_frame, text='Edit Employee', command=lambda: self.edit_emp())
-        self.editEmp.grid(column=0,row=1)
+        
+        self.submitBtn = tk.Button(self.view_frame, text='Submit', command=lambda: self.submit_emp())
         
         self.saveBtn = tk.Button(self.view_frame, text='Save', command=lambda: self.save_edit_emp())
         
         self.cancelBtn = tk.Button(self.view_frame, text='Cancel', command=lambda: self.cancel_edit_emp())
         
+    
     def add_emp(self):
         pass
-    
+        
+    def submit_emp(self):
+        
+        pass
+        
         
     def save_edit_emp(self):
         self.controller.edit_employee = False 
@@ -156,20 +165,25 @@ class emp_page(tk.Frame):
         self.parse_entry('parse', 'disabled')
     
     def cancel_edit_emp(self):
+        if self.mode == 'add':
+            pass
         self.controller.edit_employee = False  
         self.controller.frames['emp_page'].saveBtn.grid_forget()
         self.controller.frames['emp_page'].cancelBtn.grid_forget()
         self.controller.frames['emp_page'].editEmp.grid(column=0, row=1)
         self.parse_entry('cancel', 'disabled')
 
-    def edit_emp(self):
+    def edit_emp(self, mode = None):
+        self.mode = mode
         self.controller.edit_employee = True
         self.controller.frames['emp_page'].editEmp.grid_forget()
-        self.controller.frames['emp_page'].saveBtn.grid(column=0, row=1)
+        if mode == 'add':
+            self.controller.frames['emp_page'].submitBtn.grid(column=0, row=1)
+        else:
+            self.controller.frames['emp_page'].saveBtn.grid(column=0, row=1)
         self.controller.frames['emp_page'].cancelBtn.grid(column=0, row=2)
         self.parse_entry('parse', 'normal')
-        
-        
+            
         
     def parse_entry(self, mode, state):
         if mode == 'save':
@@ -471,10 +485,50 @@ class admin_page(tk.Frame):
         self.controller = controller
         label = tk.Label(self, text="Admin Page", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
+        s=ttk.Style()
+        s.theme_use('clam')
+        s.configure('Treeview', rowheight=30)
         
-        # self.addEmpBtn = tk.Button(self.view_frame, text="Add New Employee",
-        #                         command= self.add_emp)
-        # self.addEmpBtn.grid(column=0, row=0)
+        self.btn_frame = LabelFrame(self, border=True) ################################# !!! REMINDER !!! -> Remove border when done formatting
+        self.btn_frame.pack(side='bottom', fill=BOTH)
+        
+        def validateEmp():
+            return True
+            # check_valid = []
+            # peram_list = []
+            # permission = emp.permission.get()
+        
+        def add_emp():
+            new_id = EmpDat.unusedIdList.pop()
+            temp_emp = Employee(new_id, None, None, None, None, None, None, None,None)
+            self.controller.frames['emp_page'].emp_page_entries(temp_emp)
+            self.controller.frames['emp_page'].edit_emp('add')
+            
+        def add_emp_submit():
+            Valid = True
+            new_emp = validateEmp()
+            assert new_emp == Valid
+            
+            
+            
+            # add_new_employee(uvuEmpDat, new_id, emp_f_name, emp_l_name,
+            #                  emp_address, emp_city, emp_state, emp_zip, emp_class,
+            #                  emp_pay_num, emp_b_day, emp_ssn, emp_phone, emp_email,
+            #                  emp_start_date, emp_title, emp_dept, emp_permission,
+            #                  emp_pwd, emp_route_num, emp_account_num)
+            
+            
+        
+        
+        # SearchIcon = PhotoImage(file = 'emp_data_project/emp_data/SearchIcon.png')
+        # photoimage = SearchIcon.subsample(1, 1)
+        
+        
+        
+        self.searchEmp_label = Label(self, text="Search", font=('Arial', 10)).place(x=500,y=420)
+        # self.searchEmp_icon = Label(self, image=photoimage).grid(x=0,y=1)
+        self.searchEmp_entry = Entry(self, font=('Arial', 10)).place(x=550,y=420)
+        self.addEmpBtn = tk.Button(self, text="Add New Employee", command= lambda: add_emp()).place(x=550,y=450)
         
         columns_list = ("emp_ip_column", "first_name_column", "last_name_column", 
                         "phone_number_column", "email_column", "start_date_column", 
