@@ -236,9 +236,6 @@ class emp_page(tk.Frame):
             self.classification_clicked.set(str(self.employee_selected.classification))
             self.payment_method_clicked.set(str(self.employee_selected.pay_method))
             self.permission_level_clicked.set(self.employee_selected.permission)
-            # self.parse_entry('parse', 'disabled')
-            # self.controller.frames['emp_page'].emp_page_entries(self.employee_selected)
-            # self.controller.show_frame("emp_page")
             
     def emp_page_entries(self, employee, mode = None):
         self.employee_selected = employee
@@ -309,10 +306,7 @@ class emp_page(tk.Frame):
             commission.set(employee.classification.commission_rate)
         except AttributeError:
             pass
-        
-        
-    
-        
+
         self.emp_ID_label = tk.Label(self.view_frame, name='emp_id_label', justify='right', text="Employee ID:", font=('Arial', 10))
         self.emp_ID_entry = tk.Entry(self.view_frame, name='emp_id_entry', font=('Arial', 10), state=DISABLED, textvariable=emp_id)
         self.first_name_label = tk.Label(self.view_frame, name='first_name_label', justify='right', text="First Name:", font=('Arial', 10))
@@ -365,7 +359,6 @@ class emp_page(tk.Frame):
                 self.hourly_label.grid_forget()
                 self.hourly_entry.grid_forget()
                 
-            # self.controller.show_frame("emp_page")
                 
         if mode != 'cancel':
             self.classification_clicked = StringVar()
@@ -529,9 +522,6 @@ class admin_page(tk.Frame):
         emp_tree.heading("title_column", text="Title", anchor=W)
         emp_tree.heading("deptartment_column", text="Department", anchor=W)
         
-        
-        #add data
-        # my_tree.insert(parent='', index='end', iid=0, text="Parent", values=("Braden","1","orange chicken"))
         emp_tree.pack(pady=20)
         
         # Iterate through all employees to list them out.
