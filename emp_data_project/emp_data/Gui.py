@@ -1,4 +1,3 @@
-
 import tkinter as tk
 from tkinter import *
 from tkinter import messagebox
@@ -59,7 +58,6 @@ class EmpApp(tk.Tk):
         # if page_name != 'LoginPage' and page_name != 'add_employee_page' and page_name != 'emp_page':
         #     frame.home = tk.Button(frame, text="Home", command= lambda: self.show_frame("emp_page"))
         #     frame.home.place(x=900,y=0)
-        
         frame.tkraise()
 
 class LoginPage(tk.Frame):
@@ -103,13 +101,14 @@ class LoginPage(tk.Frame):
                     break
 
         if valid_username and valid_password:
+            self.controller.user = employee
             #initialize username and password entry for when user logs out
             self.username_entry.delete(0, END)
             self.password_entry.delete(0, END)
             #----------------------------------------------------
             self.focus() #removes focus on data fields
             
-            if self.controller.employee.permission == 'employee':        
+            if self.controller.employee.permission == 'employee':
                 self.controller.frames['emp_page'].emp_page_entries(employee, 'employee')
                 self.controller.show_frame("emp_page")               # calls show_frame from class EmpApp to change the frame to emp_page
             elif self.controller.employee.permission == 'admin':
@@ -130,7 +129,6 @@ class emp_page(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         self.parent = parent
-        self.priviledge = None
         self.employee_id = None
         label = tk.Label(self, text="Home Page", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
@@ -162,7 +160,7 @@ class emp_page(tk.Frame):
         self.controller.frames['emp_page'].saveBtn.grid_forget()
         self.controller.frames['emp_page'].cancelBtn.grid_forget()
         self.controller.frames['emp_page'].editEmp.grid(column=0, row=1)
-        self.parse_entry('parse', 'disabled')
+        self.parse_entry('cancel', 'disabled')
 
     def edit_emp(self):
         self.controller.edit_employee = True
@@ -219,28 +217,28 @@ class emp_page(tk.Frame):
             
             
             EmpDat.edit_employee(self.employee_id, list(entryDict.keys()), list(entryDict.values()))
-            self.parse_entry('parse', 'disabled')
+            # self.parse_entry('parse', 'disabled')
             
             
          
-        if mode == 'parse':
-
+        elif mode == 'parse':
             for x in self.controller.frames['emp_page'].view_frame.children:  # will parse through all widgets --acts like event handler that updates window when there are changes
-                if self.priviledge == 'admin':
+                if self.controller.user.permission == 'admin':
                     if (('entry') in x or self.view_frame.children[x].widgetName ==  "tk_optionMenu") and (x not in 'emp_id_entry' and x not in 'employment_status_entry'):
-                        self.view_frame.children[x]['state'] = state
-                elif self.priviledge == 'employee':
+                        self.controller.frames['emp_page'].view_frame.children[x]['state'] = state
+                elif self.controller.user.permission == 'employee':
                     if x in ('personal_phone_entry', 'personal_email_entry', 'address_entry', 'city_entry', 'state_entry', 'zip_entry', 'state_entry'):
-                        self.view_frame.children[x]['state'] = state        
+                        self.controller.frames['emp_page'].view_frame.children[x]['state'] = state        
             self.controller.show_frame("emp_page")
             
-        self.view_frame.children
-    def emp_page_entries(self, employee, priviledge):
-        self.priviledge = priviledge
-        self.employee_id = employee.id
-        # self.edit_employee = tk.Button(self.view_frame, text="Employee Directory",
-        #                        command= lambda: controller.show_frame("employee_directory_page"))
-        # self.employeeDirBtn.grid(column=0)
+        elif mode == 'cancel':
+            # self.emp_page_entries(self.employee_selected)
+            self.clicked.set(str(self.employee_selected.classification))
+            self.controller.frames['emp_page'].emp_page_entries(self.employee_selected)
+            self.controller.show_frame("emp_page")
+            
+    def emp_page_entries(self, employee):
+        self.employee_selected = employee
         
         var = StringVar()
         var.set('None')
@@ -329,49 +327,49 @@ class emp_page(tk.Frame):
         
         self.classification_label = tk.Label(self.view_frame, name='classification_label', justify='right', text="Classification:", font=('Arial', 10))
         
-            
-        def classification_dropdown_func(option):
+        self.hourly_label = tk.Label(self.view_frame, name='hourly_label', text="Hourly Rate:", font=('Arial', 10)) 
+        self.hourly_entry = tk.Entry(self.view_frame, name='hourly_entry', state=DISABLED, textvariable=hourly_rate, font=('Arial', 10))
+        self.salary_label = tk.Label(self.view_frame, name='salary_label', text="Salary:", font=('Arial', 10)) 
+        self.salary_entry = tk.Entry(self.view_frame, name='salary_entry', state=DISABLED, textvariable=salary, font=('Arial', 10))
+        self.commission_label = tk.Label(self.view_frame, name='commision_label', text="Commission Rate:", font=('Arial', 10))
+        self.commission_entry = tk.Entry(self.view_frame, name='commision_entry', state=DISABLED, textvariable=commission, font=('Arial', 10))
+        
+        def classification_dropdown_func(*args):
+            print(f"the variable has changed to '{self.clicked.get()}'")
                 # Show pay amounts, based on classification type:
-            if option == "hourly":
-                self.hourly_label = tk.Label(self.view_frame, name='hourly_label', text="Hourly Rate:", font=('Arial', 10)) 
-                self.hourly_entry = tk.Entry(self.view_frame, name='hourly_entry', state=DISABLED, textvariable=hourly_rate, font=('Arial', 10))
+            if self.clicked.get() == "hourly":
                 self.hourly_label.grid(column=1,row=11, sticky='E', padx=15, pady=7)
                 self.hourly_entry.grid(column=2,row=11)
-                if hasattr(self, 'self.commission_label'): self.controller.frames['emp_page'].view_frame.commission_label.grid_forget()
-                if hasattr(self, 'self.commission_entry'): self.controller.frames['emp_page'].view_frame.commission_entry.grid_forget()
-                if hasattr(self, 'self.salary_label'): self.controller.frames['emp_page'].salary_label.grid_forget()
-                if hasattr(self, 'self.salary_entry'): self.controller.frames['emp_page'].salary_label.grid_forget()
+                self.commission_label.grid_forget()
+                self.commission_entry.grid_forget()
+                self.salary_label.grid_forget()
+                self.salary_label.grid_forget()
                 
             # Salary
-            elif option == "salary":
-                self.salary_label = tk.Label(self.view_frame, name='salary_label', text="Salary:", font=('Arial', 10)) 
-                self.salary_entry = tk.Entry(self.view_frame, name='salary_entry', state=DISABLED, textvariable=salary, font=('Arial', 10))
+            elif self.clicked.get() == "salary":
                 self.salary_label.grid(column=1,row=11, sticky='E', padx=15, pady=7)
                 self.salary_entry.grid(column=2,row=11)
-                if hasattr(self, 'self.hourly_label'): self.hourly_label.grid_forget()
-                if hasattr(self, 'self.hourly_entry'): self.hourly_entry.grid_forget()
-                if hasattr(self, 'self.commision_label'): self.commision_label.grid_forget()
-                if hasattr(self, 'self.commision_entry'): self.commision_entry.grid_forget()
+                self.hourly_label.grid_forget()
+                self.hourly_entry.grid_forget()
+                self.commission_label.grid_forget()
+                self.commission_entry.grid_forget()
             # Commission
-            elif option == "commissioned":
-                self.salary_label = tk.Label(self.view_frame, name='salary_label', text="Salary:", font=('Arial', 10)) 
-                self.salary_entry = tk.Entry(self.view_frame, name='salary_entry', state=DISABLED, textvariable=salary, font=('Arial', 10))
-                self.commision_label = tk.Label(self.view_frame, name='commision_label', text="Commission Rate:", font=('Arial', 10))
-                self.commision_entry = tk.Entry(self.view_frame, name='commision_entry', state=DISABLED, textvariable=commission, font=('Arial', 10))
+            elif self.clicked.get() == "commissioned":
                 self.salary_label.grid(column=1,row=11, sticky='E', padx=15, pady=7)
                 self.salary_entry.grid(column=2,row=11)
-                self.commision_label.grid(column=1,row=12, sticky='E', padx=15, pady=7)
-                self.commision_entry.grid(column=2,row=12)
-                if hasattr(self, 'self.hourly_label'): self.hourly_label.grid_forget()
-                if hasattr(self, 'self.hourly_label'): self.hourly_entry.grid_forget()
+                self.commission_label.grid(column=1,row=12, sticky='E', padx=15, pady=7)
+                self.commission_entry.grid(column=2,row=12)
+                self.hourly_label.grid_forget()
+                self.hourly_entry.grid_forget()
+                
+            # self.controller.show_frame("emp_page")
                 
         
         self.clicked = StringVar()
+        self.clicked.trace('w', classification_dropdown_func)
         self.clicked.set(str(employee.classification))
-        classification_dropdown_func(str(employee.classification))
-        self.classification_dropdown = OptionMenu(self.view_frame, self.clicked, "- Select -", "salary", "commissioned", "hourly", command= lambda clicked: classification_dropdown_func(self.clicked))
+        self.classification_dropdown = OptionMenu(self.view_frame, self.clicked, "- Select -", "hourly", "salary", "commissioned")
         self.classification_dropdown.configure(state=DISABLED)
-        
         
         
    
@@ -562,8 +560,8 @@ class admin_page(tk.Frame):
             for selected_emp_idx in emp_tree.selection():
                 emp_data = emp_tree.item(selected_emp_idx)
                 emp_id = emp_data["values"][0]
-                emp = find_employee_by_id(emp_id, EmpDat.emp_list)
-            self.controller.frames['emp_page'].emp_page_entries(emp, 'admin')
+                emp = find_employee_by_id(emp_id, EmpDat.emp_list) 
+            self.controller.frames['emp_page'].emp_page_entries(emp)
             self.controller.show_frame("emp_page")          
         emp_tree.bind("<Double 1>", selected_employee)
         emp_tree.pack()
@@ -576,5 +574,3 @@ class add_employee_page(tk.Frame):
         label.pack(side="top", fill="x", pady=10)        
         self.sumbitBnt = tk.Button(self, text="Submit")
         self.sumbitBnt.pack()
-
-
