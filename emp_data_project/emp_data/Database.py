@@ -65,7 +65,7 @@ class Hourly(Classification):
     def __str__(self):
         """Returns a string representing employee's payment type.
         """
-        return "hourly"
+        return "Hourly"
 
     def num(self):
         """Returns an integer representing the hourly classification type.
@@ -95,7 +95,7 @@ class Salary(Classification):
     def __str__(self):
         """Return's a string representing employee's payment type.
         """
-        return "salary"
+        return "Salary"
 
     def num(self):
         """Returns an integer representing the salary classification type.
@@ -140,7 +140,7 @@ class Commissioned(Salary):
     def __str__(self):
         """Return's a string representing employee's payment type.
         """
-        return "commissioned"
+        return "Commissioned"
 
     def num(self):
         """Returns an integer representing the commissioned classification
@@ -218,7 +218,7 @@ class DirectMethod(PayMethod):
     def __str__(self):
         """Returns a string representing the desired pay method.
         """
-        return "direct deposit"
+        return "Direct Deposit"
 
     def num(self):
         """Returns an integer that represents the direct pay method in the
@@ -248,7 +248,7 @@ class MailedMethod(PayMethod):
     def __str__(self):
         """Returns a string representing the desired pay method.
         """
-        return "mail"
+        return "Mail"
 
     def num(self):
         """Returns an integer that represents the mail pay method in the
@@ -506,9 +506,6 @@ class EmployeeDB:
         self.update_emp_list()
         
     def update_emp_list(self):
-        self.unusedIdList = []
-        for i in range(999999):
-            self.unusedIdList.append(i)
         """
         Pulls data from the CSV to the emp list and archived emp list.
         """
@@ -518,7 +515,6 @@ class EmployeeDB:
                                 None)
             temp_emp.populate_from_row(row)
             temp_emp.job_status = 'unactive'
-            self.unusedIdList.append(temp_emp.id)
             self.archived_list.append(temp_emp)
         emp_dict = csv.DictReader(self.database)
         for row in emp_dict:
@@ -527,7 +523,6 @@ class EmployeeDB:
             temp_emp.populate_from_row(row)
             if temp_emp not in self.archived_list:
                 temp_emp.job_status = 'active'
-                self.unusedIdList.remove(temp_emp.id)
                 self.emp_list.append(temp_emp)
                 
     def archive_employee(self, id_num):
@@ -537,7 +532,6 @@ class EmployeeDB:
         employee.job_status = 'unactive'
         self.emp_list.remove(employee)
         self.archived_list.append(employee)
-        self.unusedIdList.append(id_num)
         _add_row(employee, "emp_data_project/emp_data/archived.csv")
 
 
@@ -547,7 +541,7 @@ class EmployeeDB:
         """
         employee.job_status = 'active'
         self.emp_list.append(employee)
-        _add_row(employee, "employees.csv")
+        _add_row(employee, "emp_data_project/emp_data/employees.csv")
 
     def edit_employee(self, id_num, fields: list, data: list):
         """
@@ -608,48 +602,39 @@ class EmployeeDB:
 def _add_row(employee: Employee, file):
     with open(file, "a", encoding="utf8") as database:
         writer = csv.writer(database, delimiter=',')
-        classList = [
-            #if employee is hourly & direct deposit
-            [-1,
-             employee.classification.hourly_rate, -1,
-             employee.pay_method.route_num,
-             employee.pay_method.account_num],
-            #if employee is hourly & mail
-            [-1,
-             employee.classification.hourly_rate, -1, -1, -1],
-            #if employee is salary & direct deposit
-            [employee.classification.salary, -1, -1, 
-             employee.pay_method.route_num,
-             employee.pay_method.account_num],
-            #if employee is salary & mail
-            [employee.classification.salary, -1, -1, -1, -1],
-            #if employee is comissioned & direct deposit
-            [employee.classification.salary, -1,
-            employee.classification.commission_rate,
-            employee.pay_method.route_num,
-            employee.pay_method.account_num],
-            #if employee is comissioned & mail
-            [employee.classification.salary, -1,
-             employee.classification.commission_rate, -1, -1]
-        ]
-        if str(employee.classification) == "hourly" and str(employee.pay_method) == "direct deposit":
-            var = classList[0]
-        elif str(employee.classification) == "hourly" and str(employee.pay_method) == "mail":
-            var = classList[1]
-        elif str(employee.classification) == "salary" and str(employee.pay_method) == "direct deposit":
-            var = classList[2]
-        elif str(employee.classification) == "salary" and str(employee.pay_method) == "mail":
-            var = classList[3]
-        elif str(employee.classification) == "commissioned" and str(employee.pay_method) == "direct deposit":
-            var = classList[4]
-        elif str(employee.classification) == "commissioned" and str(employee.pay_method) == "mail":
-            var = classList[5]
-        
-            var = classList[1]
+        #if employee is hourly & direct deposit
+        if str(employee.classification) == 'Hourly' and str(employee.pay_method) == 'Direct Deposit':
+            var =  [-1,
+                        employee.classification.hourly_rate, -1,
+                        employee.pay_method.route_num,
+                        employee.pay_method.account_num]
+        #if employee is hourly & mail
+        elif str(employee.classification) == 'Hourly' and str(employee.pay_method) == 'Mail':
+            var = [-1,
+                        employee.classification.hourly_rate, -1, -1, -1]
+        #if employee is salary & direct deposit
+        elif str(employee.classification) == 'Salary' and str(employee.pay_method) == 'Direct Deposit':
+            var = [employee.classification.salary, -1, -1, 
+                        employee.pay_method.route_num,
+                        employee.pay_method.account_num]
+        #if employee is salary & mail
+        elif str(employee.classification) == 'Salary' and str(employee.pay_method) == 'Mail':
+            var = [employee.classification.salary, -1, -1, -1, -1]
+        #if employee is comissioned & direct deposit
+        elif str(employee.classification) == 'Commissioned' and str(employee.pay_method) == 'Direct Deposit':
+            var = [employee.classification.salary, -1,
+                        employee.classification.commission_rate,
+                        employee.pay_method.route_num,
+                        employee.pay_method.account_num]
+        #if employee is comissioned & mail
+        elif str(employee.classification) == 'Commissioned' and str(employee.pay_method) == 'Mail':
+            var = [employee.classification.salary, -1,
+                        employee.classification.commission_rate, -1, -1]
+    
         writer.writerow([employee.id, employee.name, employee.address,
                                  employee.city, employee.state, employee.zip,
                                  employee.classification.num(),
-                                 employee.pay_method.num(),var,
+                                 employee.pay_method.num(),var[0],var[1],var[2],var[3],var[4],
                                  employee.ssn, employee.phone, employee.email, employee.start_date,
                                  employee.end_date, employee.title, employee.dept,
                                  employee.permission, employee.password])
