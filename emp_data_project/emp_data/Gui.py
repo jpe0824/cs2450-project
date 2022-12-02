@@ -158,7 +158,7 @@ class emp_page(tk.Frame):
         self.classification_clicked.set('- Select -')
         self.state_dropdown.current(0)
         self.payment_method_clicked.set('- Select -')
-        self.permission_level_clicked.set('-Select-')
+        self.permission_level_clicked.set('- Select -')
         self.controller.frames['emp_page'].editEmp.grid_forget()
         self.controller.frames['emp_page'].submitBtn.grid(column=0,row=1)
         self.backBtn['text'] = 'Cancel'
@@ -205,14 +205,119 @@ class emp_page(tk.Frame):
         else:
             if 'city_err' in errorMsg:
                 del errorMsg['city_err']
-        ############################################ Code Above is functional remove after debugging ##################
+                
+        if emp['State'] == '- Select -':
+            errorMsg['state_err'] = '• State must have a value!\n'
+        else:
+            if 'state_err' in errorMsg:
+                del errorMsg['state_err']
+                
+        if re.search(r"\d\d\d\d\d", emp['zip_entry']) is None:
+            self.zip_entry.config(highlightbackground = "red", highlightcolor= "red", highlightthickness=1)
+            errorMsg['zip_err'] = '• Zip code must contain 5 consecutive digits!\n'
+        else:
+            if 'zip_err' in errorMsg:
+                del errorMsg['zip_err']
+                
+        if re.search(r"^\(\d\d\d\)\d\d\d-\d\d\d\d$", emp['personal_phone_entry']) is None \
+                and re.search(r"^\d\d\d-\d\d\d-\d\d\d\d$", emp['personal_phone_entry']) is \
+                None and re.search(r"^\d\d\d\d\d\d\d\d\d\d$", emp['personal_phone_entry']) \
+                is None:
+            self.personal_phone_entry.config(highlightbackground = "red", highlightcolor= "red", highlightthickness=1)
+            errorMsg['personal_phone_err'] = '• Phone number must match one of the following formats: \n   (###)###-#### or ###-###-#### or ##########!\n'
+        else:
+            if 'personal_phone_err' in errorMsg:
+                del errorMsg['personal_phone_err']
+                
+        if re.search(r"^.*\w.*@\w.*\.\w+$", emp['personal_email_entry']) is None:
+            self.personal_email_entry.config(highlightbackground = "red", highlightcolor= "red", highlightthickness=1)
+            errorMsg['personal_email_err'] = '• Email address is not valid!\n'
+        else:
+            if 'personal_email_err' in errorMsg:
+                del errorMsg['personal_email_err']
+           
+        if emp['Classification'] == '- Select -':
+            errorMsg['classification_err'] = '• Classification must have a value!\n'
+        else:
+            if 'classification_err' in errorMsg:
+                del errorMsg['classification_err']
+        if re.search(r"^\d\d\/\d\d\/\d\d\d\d$", emp['dob_entry']) is None \
+                and re.search(r"^\d\d-\d\d-\d\d\d\d$", emp['dob_entry']) is \
+                None:
+            self.DOB_entry.config(highlightbackground = "red", highlightcolor= "red", highlightthickness=1)
+            errorMsg['dob_err'] = '• Dates must match the format: MM/DD/YYYY or MM-DD-YYYY\n'
+        else:
+            if 'dob_err' in errorMsg:
+                del errorMsg['dob_err']
+                
+        if re.search(r"^\d\d\d-\d\d-\d\d\d\d$", emp['ssn_entry']) is None and \
+                re.search(r"^\d\d\d\d\d\d\d\d\d$", emp['ssn_entry']) is None:
+            self.SSN_entry.config(highlightbackground = "red", highlightcolor= "red", highlightthickness=1)
+            errorMsg['ssn_err'] = '• SSN must match the format: ###-##-#### or ######### (9 digits)\n'
+        else:
+            if 'ssn_err' in errorMsg:
+                del errorMsg['ssn_err']
+                
+        if emp['Pay_Method'] == '- Select -':
+            errorMsg['Pay_Method_err'] = '• Pay_Method must have a value!\n'
+        else:
+            if 'Pay_Method_err' in errorMsg:
+                del errorMsg['Pay_Method_err']
+                
+        ################################### Back Account Info Validation goes here !! Dont forget!! ########
+                
+        if re.search(r"^\w+.?\w+$", emp['job_title_entry']) is None:
+            self.job_title_entry.config(highlightbackground = "red", highlightcolor= "red", highlightthickness=1)
+            errorMsg['job_title_err'] = '• Employee Title must have letters and numbers \
+                          only, with one special character in between  \
+                          characters allowed.\n'
+        else:
+            if 'job_title_err' in errorMsg:
+                del errorMsg['job_title_err']
+        if re.search(".+", emp['job_department_entry']) is None:
+            self.job_department_entry.config(highlightbackground = "red", highlightcolor= "red", highlightthickness=1)
+            errorMsg['job_department_err'] = '• Employee department must not be empty!\n'
+        else:
+            if 'job_department_err' in errorMsg:
+                del errorMsg['job_department_err']
+        if re.search(r"^\d\d\/\d\d\/\d\d\d\d$", emp['start_date_entry']) is None \
+                and re.search(r"^\d\d-\d\d-\d\d\d\d$", emp['start_date_entry']) is \
+                None:
+            self.start_date_entry.config(highlightbackground = "red", highlightcolor= "red", highlightthickness=1)
+            errorMsg['start_date_err'] = '• Start Date must match the format: MM/DD/YYYY or MM-DD-YYYY\n'
+        else:
+            if 'start_date_err' in errorMsg:
+                del errorMsg['start_date_err']
         
-
+        if emp['end_date_entry']:  
+            if re.search(r"^\d\d\/\d\d\/\d\d\d\d$", emp['end_date_entry']) is None \
+                    and re.search(r"^\d\d-\d\d-\d\d\d\d$", emp['end_date_entry']) is \
+                    None:
+                self.start_date_entry.config(highlightbackground = "red", highlightcolor= "red", highlightthickness=1)
+                errorMsg['end_date_err'] = '• End Date must match the format: MM/DD/YYYY or MM-DD-YYYY\n'
+            else:
+                if 'end_date_err' in errorMsg:
+                    del errorMsg['end_date_err']
                     
+        if emp['permission'] == '- Select -':
+            errorMsg['permission_err'] = '• Permission option must have a value!\n'
+        else:
+            if 'permission_err' in errorMsg:
+                del errorMsg['permission_err']
+       
+           
+           
         self.focus()
         if errorMsg:
             arr = ''.join(list(errorMsg.values()))
             messagebox.showerror("Error", arr)
+        else:
+            pass
+            # add_new_employee(EmpDat, new_id, emp_f_name, emp_l_name,
+            #                  emp_address, emp_city, emp_state, emp_zip, emp_class,
+            #                  emp_pay_num, emp_b_day, emp_ssn, emp_phone, emp_email,
+            #                  emp_start_date, emp_title, emp_dept, emp_permission,
+            #                  emp_pwd, emp_route_num, emp_account_num)
 
     def make_new_employee(self):
         check_valid = {
@@ -221,12 +326,15 @@ class emp_page(tk.Frame):
         new_emp_val = {}
         new_emp_val['Classification'] = self.classification_clicked.get()
         new_emp_val['Pay_Method'] = self.payment_method_clicked.get()
+        new_emp_val['State'] = self.state_dropdown.get()
+        new_emp_val['permission'] = self.permission_level_clicked.get()
         
         for x in self.controller.frames['emp_page'].view_frame.children:
             if (('entry') in x or self.view_frame.children[x].widgetName ==  "tk_optionMenu") and (x not in 'emp_id_entry' and x not in 'employment_status_entry'):
                 if ('entry') in x: 
                     new_emp_val[x] = self.controller.frames['emp_page'].view_frame.children[x].get()
-        self.validate_employee(new_emp_val)
+        
+        
         
             
             
@@ -307,7 +415,9 @@ class emp_page(tk.Frame):
             for x in self.controller.frames['emp_page'].view_frame.children:  # will parse through all widgets --acts like event handler that updates window when there are changes
                 if self.controller.user.permission == 'admin':
                     if (('entry') in x or self.view_frame.children[x].widgetName ==  "tk_optionMenu" or self.view_frame.children[x].widgetName == "ttk::combobox") and (x not in 'emp_id_entry' and x not in 'employment_status_entry'):                     
-                        self.controller.frames['emp_page'].view_frame.children[x]['state'] = state
+                        if self.view_frame.children[x].widgetName == "ttk::combobox" and state == 'normal':
+                            self.controller.frames['emp_page'].view_frame.children[x]['state'] = 'readonly'
+                        else: self.controller.frames['emp_page'].view_frame.children[x]['state'] = state
                         if self.mode == 'add employee':
                             if ('entry') in x: 
                                 self.controller.frames['emp_page'].view_frame.children[x].delete(0,END)
@@ -425,7 +535,9 @@ class emp_page(tk.Frame):
         self.state_label = tk.Label(self.view_frame, name='state_label', justify='right', text="State:", font=('Arial', 10))
         self.zip_label = tk.Label(self.view_frame, name='zip_label', justify='right', text="Zip:", font=('Arial', 10))
         self.zip_entry = tk.Entry(self.view_frame, name='zip_entry', font=('Arial', 10), state=DISABLED, textvariable=zipcode)
-        
+        if self.mode == 'add employee':
+            self.zip_entry.bind('<FocusIn>', remove_highlight)
+            
         self.classification_label = tk.Label(self.view_frame, name='classification_label', justify='right', text="Classification:", font=('Arial', 10))
         
         self.hourly_label = tk.Label(self.view_frame, name='hourly_label', text="Hourly Rate:", font=('Arial', 10)) 
@@ -505,14 +617,23 @@ class emp_page(tk.Frame):
    
         self.personal_phone_label = tk.Label(self.view_frame, name='personal_phone_label', justify='right', text="Personal Phone:", font=('Arial', 10))
         self.personal_phone_entry = tk.Entry(self.view_frame, name='personal_phone_entry', font=('Arial', 10), state=DISABLED, textvariable=phone)
+        if self.mode == 'add employee':
+            self.personal_phone_entry.bind('<FocusIn>', remove_highlight)
         self.personal_email_label = tk.Label(self.view_frame, name='personal_email_label', justify='right', text="Personal Email:", font=('Arial', 10))
         self.personal_email_entry = tk.Entry(self.view_frame, name='personal_email_entry', font=('Arial', 10), state=DISABLED, textvariable=email)
+        if self.mode == 'add employee':
+            self.personal_email_entry.bind('<FocusIn>', remove_highlight)
+        
         self.DOB_label = tk.Label(self.view_frame, name='dob_label', justify='right', text="Date of Birth:", font=('Arial', 10))
         self.DOB_entry = tk.Entry(self.view_frame, name='dob_entry', font=('Arial', 10), state=DISABLED, textvariable=dob)
-        
+        if self.mode == 'add employee':
+            self.DOB_entry.bind('<FocusIn>', remove_highlight)
+            
         self.SSN_label = tk.Label(self.view_frame, name='ssn_label', justify='right', text="SSN:", font=('Arial', 10))
         self.SSN_entry = tk.Entry(self.view_frame, name='ssn_entry', font=('Arial', 10), state=DISABLED, textvariable=ssn)
-        
+        if self.mode == 'add employee':
+            self.SSN_entry.bind('<FocusIn>', remove_highlight)
+            
         self.routing_number_label = tk.Label(self.view_frame, name='routing_number_label', justify='right', text="Routing Number:", font=('Arial', 10))
         self.routing_number_entry = tk.Entry(self.view_frame, name='routing_number_entry', font=('Arial', 10), state=DISABLED, textvariable=routingNum)
         self.account_number_label = tk.Label(self.view_frame, name='account_number_label', justify='right', text="Account Number:", font=('Arial', 10))
@@ -521,12 +642,24 @@ class emp_page(tk.Frame):
         
         self.job_title_label = tk.Label(self.view_frame, name='job_title_label', justify='right', text="Job Title:", font=('Arial', 10))
         self.job_title_entry = tk.Entry(self.view_frame, name='job_title_entry', font=('Arial', 10), state=DISABLED, textvariable=job_title)
+        if self.mode == 'add employee':
+            self.job_title_entry.bind('<FocusIn>', remove_highlight)
+            
         self.job_department_label = tk.Label(self.view_frame, name='job_department_label', justify='right', text="Department:", font=('Arial', 10))
         self.job_department_entry = tk.Entry(self.view_frame, name='job_department_entry', font=('Arial', 10), state=DISABLED, textvariable=job_dept)
+        if self.mode == 'add employee':
+            self.job_department_entry.bind('<FocusIn>', remove_highlight)
+            
         self.start_date_label = tk.Label(self.view_frame, name='start_date_label', justify='right', text="Start Date:", font=('Arial', 10))
         self.start_date_entry = tk.Entry(self.view_frame, name='start_date_entry', font=('Arial', 10), state=DISABLED, textvariable=start_date)
+        if self.mode == 'add employee':
+            self.start_date_entry.bind('<FocusIn>', remove_highlight)
+            
         self.end_date_label = tk.Label(self.view_frame, name='end_date_label', justify='right', text="End Date:", font=('Arial', 10))
         self.end_date_entry = tk.Entry(self.view_frame, name='end_date_entry', font=('Arial', 10), state=DISABLED, textvariable=end_date)
+        if self.mode == 'add employee':
+            self.end_date_entry.bind('<FocusIn>', remove_highlight)
+            
         self.employment_status_label = tk.Label(self.view_frame, name='employment_status_label', justify='right', text="Employment Status:", font=('Arial', 10))
         self.employment_status_entry = tk.Entry(self.view_frame, name='employment_status_entry', font=('Arial', 10), state=DISABLED, textvariable=job_status)
         self.password_label = tk.Label(self.view_frame, name='password_label', justify='right', text="Password:", font=('Arial', 10))
