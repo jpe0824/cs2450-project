@@ -121,7 +121,7 @@ class LoginPage(tk.Frame):
             self.password_entry.delete(0, END)                            
             messagebox.showerror("Invalid","invalid password")
 
-        else: 
+        else:
             self.password_entry.delete(0, END)
             messagebox.showerror("Invalid","invalid username and password")
 
@@ -140,20 +140,87 @@ class emp_page(tk.Frame):
         self.view_frame.pack(fill='x')
         
         self.editEmp = tk.Button(self.view_frame, text='Edit Employee', command=lambda: self.edit_emp())
+        self.editEmp.grid(column=0, row=1)
         
-        self.submitBtn = tk.Button(self.view_frame, text='Submit', command=lambda: self.submit_emp())
+        self.backBtn = tk.Button(self.view_frame, text='Back', command=lambda: self.controller.show_frame("admin_page") )
+        
+        self.submitBtn = tk.Button(self.view_frame, text='Submit', command=lambda: self.make_new_employee())
         
         self.saveBtn = tk.Button(self.view_frame, text='Save', command=lambda: self.save_edit_emp())
         
         self.cancelBtn = tk.Button(self.view_frame, text='Cancel', command=lambda: self.cancel_edit_emp())
         
-    
-    def add_emp(self):
-        pass
+        
+    # Clears all data fields in employee page to fill in new employee info
+    def add_emp_innit(self):
+        self.parse_entry('parse', 'normal')
+        self.classification_clicked.set('- Select -')
+        self.payment_method_clicked.set('- Select -')
+        self.permission_level_clicked.set('-Select-')
+        self.controller.frames['emp_page'].editEmp.grid_forget()
+        self.controller.frames['emp_page'].submitBtn.grid(column=0,row=1)
+        self.backBtn['text'] = 'Cancel'
+        
+    def validate_employee(self, emp):
+        errorMsg = {}
+        
+        if not emp['first_name_entry'].strip():
+            self.first_name_entry.config(highlightbackground = "red", highlightcolor= "red", highlightthickness=1)
+            errorMsg['first_name_empty_err'] = '• Error: First Name must have a value!\n' 
+        elif not emp['first_name_entry'].isalpha():
+            self.first_name_entry.config(highlightbackground = "red", highlightcolor= "red", highlightthickness=1)
+            errorMsg['first_name_NaN'] = '• Error: First Name must only contain letters!\n'
+        else:
+            if 'first_name_NaN' in errorMsg:
+                del errorMsg['first_name_NaN']
+            if 'first_name_empty_err' in errorMsg:
+                del errorMsg['first_name_empty_err']
+                
+        if not emp['last_name_entry'].strip():
+            self.last_name_entry.config(highlightbackground = "red", highlightcolor= "red", highlightthickness=1)
+            errorMsg['last_name_empty_err'] = '• Error: Last Name must have a value!\n' 
+        elif not emp['last_name_entry'].isalpha():
+            self.last_name_entry.config(highlightbackground = "red", highlightcolor= "red", highlightthickness=1)
+            errorMsg['last_name_NaN'] = '• Error: Last Name must only contain letters!\n'
+        else:
+            if 'last_name_NaN' in errorMsg:
+                del errorMsg['last_name_NaN']
+            if 'last_name_empty_err' in errorMsg:
+                del errorMsg['last_name_empty_err']
+                    
+        self.focus()
+        if errorMsg:
+            arr = ''.join(list(errorMsg.values()))
+            messagebox.showerror("Error", arr)
+
+    def make_new_employee(self):
+        check_valid = {
+                'input_hasValue': False
+        }
+        new_emp_val = {}
+        new_emp_val['Classification'] = self.classification_clicked.get()
+        new_emp_val['Pay_Method'] = self.payment_method_clicked.get()
+        
+        for x in self.controller.frames['emp_page'].view_frame.children:
+            if (('entry') in x or self.view_frame.children[x].widgetName ==  "tk_optionMenu") and (x not in 'emp_id_entry' and x not in 'employment_status_entry'):
+                if ('entry') in x: 
+                    new_emp_val[x] = self.controller.frames['emp_page'].view_frame.children[x].get()
+        self.validate_employee(new_emp_val)
+        
+            
+            
+            
+            
+            
+            
+        
+    def add_emp_submit(self):
+        Valid = True
+        new_emp = self.make_new_employee()
+        assert new_emp == Valid
         
     def submit_emp(self):
-        
-        pass
+        print("submitting new employee form")
         
         
     def save_edit_emp(self):
@@ -162,30 +229,23 @@ class emp_page(tk.Frame):
         self.controller.frames['emp_page'].cancelBtn.grid_forget()
         self.controller.frames['emp_page'].editEmp.grid(column=0, row=1)
         self.parse_entry('save','none')
-        self.parse_entry('parse', 'disabled')
     
     def cancel_edit_emp(self):
-        if self.mode == 'add':
-            pass
         self.controller.edit_employee = False  
         self.controller.frames['emp_page'].saveBtn.grid_forget()
         self.controller.frames['emp_page'].cancelBtn.grid_forget()
         self.controller.frames['emp_page'].editEmp.grid(column=0, row=1)
         self.parse_entry('cancel', 'disabled')
 
-    def edit_emp(self, mode = None):
-        self.mode = mode
+    def edit_emp(self):
         self.controller.edit_employee = True
         self.controller.frames['emp_page'].editEmp.grid_forget()
-        if mode == 'add':
-            self.controller.frames['emp_page'].submitBtn.grid(column=0, row=1)
-        else:
-            self.controller.frames['emp_page'].saveBtn.grid(column=0, row=1)
+        self.controller.frames['emp_page'].saveBtn.grid(column=0, row=1)
         self.controller.frames['emp_page'].cancelBtn.grid(column=0, row=2)
         self.parse_entry('parse', 'normal')
             
         
-    def parse_entry(self, mode, state):
+    def parse_entry(self, mode = None, state = None):
         if mode == 'save':
             entryDict = {
                     'ID': self.emp_ID_entry.get(),
@@ -216,34 +276,25 @@ class emp_page(tk.Frame):
             elif self.payment_method_clicked.get() == 'mail':
                 entryDict['Pay_Method'] = '2'
             
-            # if self.priviledge == 'admin':
-            #     EmpDat.edit_employee(self.controller.employee.id, list(entryDict.keys()), list(entryDict.values())) 
-            # elif self.priviledge == 'employee':
-            #     entryDict = {
-            #         'Address': self.address_entry.get(),
-            #         'City': self.city_entry.get(),
-            #         'State': self.state_entry.get(),
-            #         'Zip': self.zip_entry.get(),
-            #         'Phone': self.personal_phone_entry.get(),
-            #         'Email': self.personal_email_entry.get()
-            #     }
-            
-            
             
             EmpDat.edit_employee(self.employee_id, list(entryDict.keys()), list(entryDict.values()))
-            # self.parse_entry('parse', 'disabled')
+            self.parse_entry('parse', 'disabled')
             
             
          
         elif mode == 'parse':
             for x in self.controller.frames['emp_page'].view_frame.children:  # will parse through all widgets --acts like event handler that updates window when there are changes
                 if self.controller.user.permission == 'admin':
-                    if (('entry') in x or self.view_frame.children[x].widgetName ==  "tk_optionMenu") and (x not in 'emp_id_entry' and x not in 'employment_status_entry'):
+                    if (('entry') in x or self.view_frame.children[x].widgetName ==  "tk_optionMenu") and (x not in 'emp_id_entry' and x not in 'employment_status_entry'):                     
                         self.controller.frames['emp_page'].view_frame.children[x]['state'] = state
+                        if self.mode == 'add employee':
+                            if ('entry') in x: 
+                                self.controller.frames['emp_page'].view_frame.children[x].delete(0,END)
                 elif self.controller.user.permission == 'employee':
                     if x in ('personal_phone_entry', 'personal_email_entry', 'address_entry', 'city_entry', 'state_entry', 'zip_entry', 'state_entry'):
                         self.controller.frames['emp_page'].view_frame.children[x]['state'] = state        
             self.controller.show_frame("emp_page")
+            
             
         elif mode == 'cancel':
             self.emp_page_entries(self.employee_selected, 'cancel')
@@ -252,7 +303,17 @@ class emp_page(tk.Frame):
             self.permission_level_clicked.set(self.employee_selected.permission)
             
     def emp_page_entries(self, employee, mode = None):
+        self.mode = mode  # changes parser mode so it can initilize each individual field for new employee
+        
+        def remove_highlight(event):
+            event.widget['highlightthickness'] = 0
+        
         self.employee_selected = employee
+        
+        if self.controller.user.permission == 'admin':
+            self.backBtn.grid(column=0, row=2)
+        else:
+            self.backBtn.grid_forget()
         
         var = StringVar()
         var.set('None')
@@ -325,8 +386,12 @@ class emp_page(tk.Frame):
         self.emp_ID_entry = tk.Entry(self.view_frame, name='emp_id_entry', font=('Arial', 10), state=DISABLED, textvariable=emp_id)
         self.first_name_label = tk.Label(self.view_frame, name='first_name_label', justify='right', text="First Name:", font=('Arial', 10))
         self.first_name_entry = tk.Entry(self.view_frame, name='first_name_entry', font=('Arial', 10), state=DISABLED, textvariable=first_name)
+        if self.mode == 'add employee':
+            self.first_name_entry.bind('<FocusIn>', remove_highlight)
         self.last_name_label = tk.Label(self.view_frame, name='last_name_label', justify='right', text="Last Name:", font=('Arial', 10))
         self.last_name_entry = tk.Entry(self.view_frame, name='last_name_entry', font=('Arial', 10), state=DISABLED, textvariable=last_name)
+        if self.mode == 'add employee':
+            self.last_name_entry.bind('<FocusIn>', remove_highlight)
         self.address_label = tk.Label(self.view_frame, name='address_label', justify='right', text="Address:", font=('Arial', 10))
         self.address_entry = tk.Entry(self.view_frame, name='address_entry', font=('Arial', 10), state=DISABLED, textvariable=address)
         self.city_label = tk.Label(self.view_frame, name='city_label', justify='right', text="City:", font=('Arial', 10))
@@ -476,6 +541,8 @@ class emp_page(tk.Frame):
             self.account_number_label.grid(column=3, row=4, sticky='E', padx=15, pady=7)
             self.routing_number_entry.grid(column=4 , row=3)
             self.account_number_entry.grid(column=4 , row=4)
+        
+        
             
 class admin_page(tk.Frame):
     
@@ -492,22 +559,13 @@ class admin_page(tk.Frame):
         self.btn_frame = LabelFrame(self, border=True) ################################# !!! REMINDER !!! -> Remove border when done formatting
         self.btn_frame.pack(side='bottom', fill=BOTH)
         
-        def validateEmp():
-            return True
-            # check_valid = []
-            # peram_list = []
-            # permission = emp.permission.get()
-        
+            
         def add_emp():
             new_id = EmpDat.unusedIdList.pop()
-            temp_emp = Employee(new_id, None, None, None, None, None, None, None,None)
-            self.controller.frames['emp_page'].emp_page_entries(temp_emp)
-            self.controller.frames['emp_page'].edit_emp('add')
+            temp_emp = Employee(new_id, '', '', '', '', '', '', '','')
+            self.controller.frames['emp_page'].emp_page_entries(temp_emp, 'add employee')
+            self.controller.frames['emp_page'].add_emp_innit()
             
-        def add_emp_submit():
-            Valid = True
-            new_emp = validateEmp()
-            assert new_emp == Valid
             
             
             
