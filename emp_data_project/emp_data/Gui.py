@@ -4,6 +4,7 @@ from tkinter import messagebox
 from tkinter.messagebox import askyesno
 from tkinter import font  as tkfont
 from tkinter import ttk
+import re
 # from PIL import Image, ImageTk
 import uuid
 
@@ -155,6 +156,7 @@ class emp_page(tk.Frame):
     def add_emp_innit(self):
         self.parse_entry('parse', 'normal')
         self.classification_clicked.set('- Select -')
+        self.state_dropdown.current(0)
         self.payment_method_clicked.set('- Select -')
         self.permission_level_clicked.set('-Select-')
         self.controller.frames['emp_page'].editEmp.grid_forget()
@@ -163,6 +165,7 @@ class emp_page(tk.Frame):
         
     def validate_employee(self, emp):
         errorMsg = {}
+        
         
         if not emp['first_name_entry'].strip():
             self.first_name_entry.config(highlightbackground = "red", highlightcolor= "red", highlightthickness=1)
@@ -187,6 +190,24 @@ class emp_page(tk.Frame):
                 del errorMsg['last_name_NaN']
             if 'last_name_empty_err' in errorMsg:
                 del errorMsg['last_name_empty_err']
+                
+        if re.search(r"[a-zA-Z]", emp['address_entry']) is None or \
+                re.search("[0-9]", emp['address_entry']) is None:
+            self.address_entry.config(highlightbackground = "red", highlightcolor= "red", highlightthickness=1)
+            errorMsg['address_err'] = '• Address must have letters and numbers!\n'
+        else:
+            if 'address_err' in errorMsg:
+                del errorMsg['address_err']
+                
+        if re.search(r"^[a-zA-Z]+[ -]*[a-zA-Z]+$", emp['city_entry']) is None:
+            self.city_entry.config(highlightbackground = "red", highlightcolor= "red", highlightthickness=1)
+            errorMsg['city_err'] = '• City must have letters only, with one space or dash allowed!\n'
+        else:
+            if 'city_err' in errorMsg:
+                del errorMsg['city_err']
+        ############################################ Code Above is functional remove after debugging ##################
+        
+
                     
         self.focus()
         if errorMsg:
@@ -252,7 +273,7 @@ class emp_page(tk.Frame):
                     'Address': self.address_entry.get(),
                     'Name': " ".join([self.first_name_entry.get(), self.last_name_entry.get()]),
                     'City': self.city_entry.get(),
-                    'State': self.state_entry.get(),
+                    'State': self.state_dropdown.get(),
                     'Zip': self.zip_entry.get(),
                     'Phone': self.personal_phone_entry.get(),
                     'Email': self.personal_email_entry.get(),
@@ -285,7 +306,7 @@ class emp_page(tk.Frame):
         elif mode == 'parse':
             for x in self.controller.frames['emp_page'].view_frame.children:  # will parse through all widgets --acts like event handler that updates window when there are changes
                 if self.controller.user.permission == 'admin':
-                    if (('entry') in x or self.view_frame.children[x].widgetName ==  "tk_optionMenu") and (x not in 'emp_id_entry' and x not in 'employment_status_entry'):                     
+                    if (('entry') in x or self.view_frame.children[x].widgetName ==  "tk_optionMenu" or self.view_frame.children[x].widgetName == "ttk::combobox") and (x not in 'emp_id_entry' and x not in 'employment_status_entry'):                     
                         self.controller.frames['emp_page'].view_frame.children[x]['state'] = state
                         if self.mode == 'add employee':
                             if ('entry') in x: 
@@ -327,8 +348,6 @@ class emp_page(tk.Frame):
         address.set(employee.address)
         city = StringVar()
         city.set(employee.city)
-        state = StringVar()
-        state.set(employee.state)
         zipcode = StringVar()
         zipcode.set(employee.zip)
         classification = StringVar()
@@ -394,10 +413,16 @@ class emp_page(tk.Frame):
             self.last_name_entry.bind('<FocusIn>', remove_highlight)
         self.address_label = tk.Label(self.view_frame, name='address_label', justify='right', text="Address:", font=('Arial', 10))
         self.address_entry = tk.Entry(self.view_frame, name='address_entry', font=('Arial', 10), state=DISABLED, textvariable=address)
+        if self.mode == 'add employee':
+            self.address_entry.bind('<FocusIn>', remove_highlight)
         self.city_label = tk.Label(self.view_frame, name='city_label', justify='right', text="City:", font=('Arial', 10))
         self.city_entry = tk.Entry(self.view_frame, name='city_entry', font=('Arial', 10), state=DISABLED, textvariable=city)
+        if self.mode == 'add employee':
+            self.city_entry.bind('<FocusIn>', remove_highlight)
+            
+            
+        
         self.state_label = tk.Label(self.view_frame, name='state_label', justify='right', text="State:", font=('Arial', 10))
-        self.state_entry = tk.Entry(self.view_frame, name='state_entry', font=('Arial', 10), state=DISABLED, textvariable=state)
         self.zip_label = tk.Label(self.view_frame, name='zip_label', justify='right', text="Zip:", font=('Arial', 10))
         self.zip_entry = tk.Entry(self.view_frame, name='zip_entry', font=('Arial', 10), state=DISABLED, textvariable=zipcode)
         
@@ -440,6 +465,24 @@ class emp_page(tk.Frame):
                 
                 
         if mode != 'cancel':
+            stateDict = {
+            0:'- Select -',1:'AL',2:'AK',3:'AZ',4:'AR',5:'CA',6:'CO',7:'CT',8:'DE',9:'FL',10:'GA',11:'HI',
+            12:'ID',13:'IL',14:'IN',15:'IA',16:'KS',17:'KY',18:'LA',19:'ME',20:'MD',21:'MA',22:'MI',
+            23:'MN',24:'MS',25:'MO',26:'MT',27:'NE',28:'NV',29:'NH',30:'NJ',31:'NM',32:'NY',33:'NC',
+            34:'ND',35:'OH',36:'OK',37:'OR',38:'PA',39:'RI',40:'SC',41:'SD',42:'TN',43:'TX',44:'UT',
+            45:'VT',46:'VA',47:'WA',48:'WV',49:'WI',50:'WY'
+            }
+             
+            # self.state_dropdown = tk.Entry(self.view_frame, name='state_entry', font=('Arial', 10), state=DISABLED, textvariable=state)
+            self.state_clicked = StringVar()
+            self.state_clicked.set(employee.state)
+            self.state_dropdown = ttk.Combobox(self.view_frame, value = list(stateDict.values()), state=DISABLED)
+            for key,val in stateDict.items():
+                if val == employee.state:
+                    self.state_dropdown.current(key)
+                    break
+            
+            
             self.classification_clicked = StringVar()
             self.classification_clicked.trace('w', classification_dropdown_func)
             self.classification_clicked.set(str(employee.classification))
@@ -453,6 +496,7 @@ class emp_page(tk.Frame):
             self.permission_level_clicked.set(employee.permission)
             self.permission_level_dropdown = OptionMenu(self.view_frame, self.permission_level_clicked, "- Select -", "employee", "admin")
             
+        self.state_dropdown.configure(state=DISABLED)
         self.classification_dropdown.configure(state=DISABLED)
         self.payment_method_dropdown.configure(state=DISABLED)
         self.permission_level_dropdown.configure(state=DISABLED)
@@ -518,7 +562,7 @@ class emp_page(tk.Frame):
         self.last_name_entry.grid(column=2 , row=3)
         self.address_entry.grid(column=2 , row=4)
         self.city_entry.grid(column=2 , row=5)
-        self.state_entry.grid(column=2 , row=6)
+        self.state_dropdown.grid(column=2 , row=6)
         self.zip_entry.grid(column=2 , row=7)
         self.personal_phone_entry.grid(column=2 , row=8)
         self.personal_email_entry.grid(column=2 , row=9)
