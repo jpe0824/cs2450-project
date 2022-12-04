@@ -326,8 +326,8 @@ class Employee():
         self.ssn = ssn
         self.phone = phone
         self.email = email
-        self.start_date = None
-        self.end_date = None
+        self.start_date = 'MM/DD/YYYY'
+        self.end_date = 'MM/DD/YYYY'
         self.title = None
         self.dept = None
         self.permission = permission
@@ -600,7 +600,7 @@ class EmployeeDB:
 
 
 def _add_row(employee: Employee, file):
-    with open(file, "a", encoding="utf8") as database:
+    with open(file, "a", newline='', encoding="utf8") as database:
         writer = csv.writer(database, delimiter=',')
         #if employee is hourly & direct deposit
         if str(employee.classification) == 'Hourly' and str(employee.pay_method) == 'Direct Deposit':
@@ -634,10 +634,11 @@ def _add_row(employee: Employee, file):
         writer.writerow([employee.id, employee.name, employee.address,
                                  employee.city, employee.state, employee.zip,
                                  employee.classification.num(),
-                                 employee.pay_method.num(),var[0],var[1],var[2],var[3],var[4],
-                                 employee.ssn, employee.phone, employee.email, employee.start_date,
-                                 employee.end_date, employee.title, employee.dept,
-                                 employee.permission, employee.password])
+                                 employee.pay_method.num(),
+                                 var[0],var[1],var[2],var[3],var[4],
+                                 employee.birth_date, employee.ssn, employee.phone, employee.email, 
+                                 employee.start_date, employee.end_date, employee.title, 
+                                 employee.dept, employee.permission, employee.password])
       
            
 
@@ -659,11 +660,7 @@ def add_new_employee(emp_db: EmployeeDB, id_num, first_name, last_name,
     employee.set_pay_method(pay_method_num, route_num, account_num)
 
     emp_db.add_employee(employee)
-
-# def add_new_employee():
-#     field_names = ['ID','Name','Address','City','State','Zip','Classification','Pay_Method','Salary','Hourly','Commission','Route','Account','Birth_Date','SSN','Phone','Email','Start_Date','End_Date','Title','Dept','Permission','Password']
-#     temp_dict = Employee(None, None, None, None, None, None, None, None, None)
-#     with open()
+    return employee
 
 
 def open_file(the_file):
