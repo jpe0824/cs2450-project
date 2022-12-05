@@ -895,6 +895,7 @@ class admin_page(tk.Frame):
         self.controller = controller
         label = tk.Label(self, text="Admin Page", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
+        self.offsetx = 0
         s = ttk.Style()
         s.theme_use('clam')
         s.configure('Treeview', rowheight=30)
@@ -904,13 +905,14 @@ class admin_page(tk.Frame):
         self.btn_frame.pack(side='bottom', fill=BOTH)
         # SearchIcon = PhotoImage(file = 'emp_data_project/emp_data/SearchIcon.png')
         # photoimage = SearchIcon.subsample(1, 1)
+        self.offsetx = -35
         self.searchEmp_Btn = Button(self, text="Search", font=(
-            'Arial', 10), command=lambda: self.search_for_emp()).place(x=710, y=420)
+            'Arial', 10), command=lambda: self.search_for_emp()).place(x=710 + self.offsetx, y=420)
         # self.searchEmp_icon = Label(self, image=photoimage).grid(x=0,y=1)
         self.searchEmp_entry = Entry(
-            self, font=('Arial', 10)).place(x=550, y=420)
+            self, font=('Arial', 10)).place(x=550 + self.offsetx, y=420)
         self.addEmpBtn = tk.Button(
-            self, text="Add New Employee", command=lambda: self.add_emp()).place(x=550, y=450)
+            self, text="Add New Employee", command=lambda: self.add_emp()).place(x=550, y=460)
         self.columns_list = ("emp_ip_column", "first_name_column", "last_name_column",
                              "phone_number_column", "email_column", "start_date_column",
                              "end_date_column", "classification_column", "title_column",
