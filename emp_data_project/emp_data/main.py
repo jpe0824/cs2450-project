@@ -1,10 +1,12 @@
 from Gui import *
 from Employee import *
-from Database import *
+# from Database import *
+
 
 
 def main():
     app = EmpApp()
+    app.after(1000, app)
     app.mainloop()
 
 
