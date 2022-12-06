@@ -106,7 +106,19 @@ class LoginPage(tk.Frame):
         border = tk.LabelFrame(
             self, text='Login', bg='#333333', fg="#FF3399", font=("Arial Bold", 20))
         border.pack(fill="both", expand="yes", padx=150, pady=150)
-
+        def enterKey_func(event):
+            if self.username_entry.get() and not self.password_entry.get():
+                self.validateLogin(
+            self.username_entry.get(), '')
+            elif not self.username_entry.get() and self.password_entry.get():
+                self.validateLogin(
+            '', self.password_entry.get())
+            elif not self.username_entry.get() and not self.password_entry.get():
+                self.validateLogin(
+            '', '')
+            else:
+                self.validateLogin(
+            self.username_entry.get(), self.password_entry.get())
         # creating widgets for login page
         self.login_label = tk.Label(
             border, text="Login", bg='#333333', fg="#FF3399", font=('Arial', 30))
@@ -114,12 +126,16 @@ class LoginPage(tk.Frame):
             border, text="Username", bg='#333333', fg="#FFFFFF", font=('Arial', 16))
         self.username_entry = tk.Entry(
             border, font=('Arial', 16), textvariable=username)
+        self.username_entry.bind('<Return>', enterKey_func)
+        
         self.password_entry = tk.Entry(
             border, show='*', font=('Arial', 16), textvariable=password)
+        self.password_entry.bind('<Return>', enterKey_func)
         self.password_label = tk.Label(
             border, text='Password', bg='#333333', fg="#FFFFFF", font=('Arial', 16))
         self.login_button = tk.Button(border, text='Login', bg='#FF3399', fg='#FFFFFF', command=lambda: self.validateLogin(
             self.username_entry.get(), self.password_entry.get()))
+        
 
         # Positioning widgets on the screen
         self.username_label.place(x=50, y=20)
@@ -132,12 +148,15 @@ class LoginPage(tk.Frame):
         valid_username = False
         valid_password = False
         for employee in EmpDat.emp_list:
-            if employee.id == int(username):
-                valid_username = True
+            try:
+                if employee.id == int(username):
+                    valid_username = True
                 if employee.password == password:
                     valid_password = True
                     self.controller.employee = employee
                     break
+            except ValueError:
+                continue
 
         if valid_username and valid_password:
             self.controller.user = employee
@@ -331,7 +350,7 @@ class emp_page(tk.Frame):
                 highlightbackground="red", highlightcolor="red", highlightthickness=1)
             errorMsg['start_date_err'] = '• Error: Start Date must match the format: MM/DD/YYYY\n'
 
-        if emp['end_date_entry']:
+        if emp['end_date_entry'] and emp['end_date_entry'] != 'MM/DD/YYYY':
             if re.search("^[0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{4}$", emp['end_date_entry']) is None:
                 self.end_date_entry.config(
                     highlightbackground="red", highlightcolor="red", highlightthickness=1)
@@ -807,23 +826,19 @@ class emp_page(tk.Frame):
                 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
             ]
 
-            def state_dropdown_key_set(event):
-                for key, val in stateList.items():
-                    if event.keysym.lower() == val[0].lower():
-                        self.state_dropdown.current(key)
-
             self.state_clicked = StringVar(
                 self.view_frame, value=employee.state, name='')
             self.state_dropdown = mycombobox(
                 self.view_frame, value=stateList, state=DISABLED)
             self.state_dropdown.set(employee.state)
+            self.state_dropdown.grid(column=2,row=6)
 
             classList = ["- Select -", "Hourly", "Salary", "Commissioned"]
             self.classification_clicked = StringVar(
                 self.view_frame, value='', name='classification_clicked_val')
             self.classification_clicked.trace(
                 'w', classification_dropdown_func)
-            self.classification_clicked.set('Hourly')
+            self.classification_clicked.set(str(employee.classification))
             self.classification_dropdown = mycombobox(self.view_frame, value=
                 classList, textvariable=self.classification_clicked)
             self.classification_dropdown.grid(column=2, row=10)
@@ -839,7 +854,8 @@ class emp_page(tk.Frame):
 
             permissionList = ["- Select -", "employee", "admin"]
             self.permission_level_clicked = StringVar(
-                self.view_frame, value=employee.permission, name='permission_level_clicked_val')
+                self.view_frame, value='', name='permission_level_clicked_val')
+            self.permission_level_clicked.set(employee.permission)
             self.permission_level_dropdown = mycombobox(
                 self.view_frame, textvariable=self.permission_level_clicked, value=permissionList)
             self.permission_level_dropdown.grid(column=6, row=2)
