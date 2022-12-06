@@ -152,12 +152,10 @@ class Commissioned(Salary):
 def create_classification(class_num, pay_num_1, pay_num_2=0):
     """Creates an Hourly, Salary, or Commissioned class object based on
     the class_num, and assigns the proper data members.
-
     Input: pay_num_1 - a float representing hourly pay or salary,
                 depending on the employee's classification.
            pay_num_2 - a float representing commissioned pay rate, used
                 only for commissioned employees (class_num = 3).
-
     Output: Either an Hourly, Salary, or Commissioned class object.
     """
     if class_num == 1:
@@ -177,7 +175,6 @@ class PayMethod():
 
     def __init__(self, employee):
         """Initialize data members.
-
         Input: Employee object ("employee" param)
         """
         self.employee = " ".join([employee.first_name, employee.last_name])
@@ -261,7 +258,6 @@ def create_pay_method(employee, pay_method_num, route_num=0,
                       account_num=0):
     """Creates an DirectMethod or MailedMethod class object based on the
     pay_method_num, and assigns the proper data members.
-
     Input: employee - an employee class object that the pay method will be
                 tied to.
            route_num - a string representing the employee's bank routing
@@ -270,7 +266,6 @@ def create_pay_method(employee, pay_method_num, route_num=0,
            account_num - a string representing the employee's account
                 number, used only if they're using DirectMethod
                 (pay_method_num = 1).
-
     Output: Either a DirectMethod or MailedMethod class object.
     """
     if pay_method_num == 1:
@@ -284,11 +279,9 @@ def create_pay_method(employee, pay_method_num, route_num=0,
 class Employee():
     """
     Main employee class
-
     Initialize it with Name SNN Phone email and its classification, after
     that use the three functions set_address, set_pay and set_job to fill
     in the rest of the info
-
     The reason it is split so weird is because you might not necessarily
     want to put in 100% of someones info at once so its split into three
     categories
@@ -340,10 +333,8 @@ class Employee():
         the appropriate payment info within it.
         This function can be used to set/change an employee's pay, as
         well.
-
         Input: The int 1, 2, or 3 for classification type of Hourly,
                 Salary, or Commissioned, respectively.
-
                 For Hourly, input just hourly pay rate (float).
                 For Salaried, input just salary (float).
                 For Commissioned, input salary first (float), then
@@ -547,12 +538,10 @@ class EmployeeDB:
         """
         Edits an existing employee given ID, the fields you want to edit,
         and the data for those fields.
-
         Be careful if you edit things it really edits them in the DB
         while you're testing I would
         open("temp/employees.csv", "w",newline='') in on line 616
         of open("employees.csv", "w",newline='')
-
         """
         with open("emp_data_project/emp_data/employees.csv", encoding="utf8") as database:
             emp_dict = csv.DictReader(database)
@@ -672,7 +661,6 @@ def open_file(the_file):
 def find_employee_by_id(employee_id, emp_list):
     """Finds an employee with the given ID in the given employee list, and
     returns it. Returns None if no employee has the given ID.
-
     Input: int, list of Employee objects
     Output: Employee object with matching id, or None.
     """
@@ -680,6 +668,3 @@ def find_employee_by_id(employee_id, emp_list):
         if employee.id == employee_id:
             return employee
     return None
-
-
-    

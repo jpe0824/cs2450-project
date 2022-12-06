@@ -939,6 +939,7 @@ class admin_page(tk.Frame):
         def set_filterVar(*args):
             if self.searchFilterClick.get() != 'Filter':
                 self.filterVar = self.searchFilterClick.get()
+                self.searchEmp_entry.configure(fg='grey')
                 self.search_var.set("Search by {0}".format(self.filterVar))
                 
         def searchFocusOut(event):
