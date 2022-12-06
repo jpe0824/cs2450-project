@@ -6,7 +6,6 @@ from Employee import *
 
 def main():
     app = EmpApp()
-    app.after(1000, app)
     app.mainloop()
 
 

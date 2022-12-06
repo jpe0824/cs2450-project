@@ -115,7 +115,7 @@ class LoginPage(tk.Frame):
             '', self.password_entry.get())
             elif not self.username_entry.get() and not self.password_entry.get():
                 self.validateLogin(
-            '', '')
+            '','')
             else:
                 self.validateLogin(
             self.username_entry.get(), self.password_entry.get())
@@ -218,10 +218,6 @@ class emp_page(tk.Frame):
 
     def add_emp_innit(self):
         self.parse_entry('parse', 'normal')
-        self.classification_clicked.set('- Select -')
-        self.state_dropdown.current(0)
-        self.payment_method_clicked.set('- Select -')
-        self.permission_level_clicked.set('- Select -')
         self.controller.frames['emp_page'].editEmp.grid_forget()
         self.controller.frames['emp_page'].submitBtn.grid(column=0, row=1)
         self.backBtn['text'] = 'Cancel'
@@ -827,10 +823,13 @@ class emp_page(tk.Frame):
             ]
 
             self.state_clicked = StringVar(
-                self.view_frame, value=employee.state, name='')
+                self.view_frame, value=employee.state, name='state_clicked_val')
             self.state_dropdown = mycombobox(
                 self.view_frame, value=stateList, state=DISABLED)
-            self.state_dropdown.set(employee.state)
+            if employee.state:
+                self.state_dropdown.set(employee.state)
+            else: 
+                self.state_dropdown.set('- Select -')
             self.state_dropdown.grid(column=2,row=6)
 
             classList = ["- Select -", "Hourly", "Salary", "Commissioned"]
@@ -838,7 +837,12 @@ class emp_page(tk.Frame):
                 self.view_frame, value='', name='classification_clicked_val')
             self.classification_clicked.trace(
                 'w', classification_dropdown_func)
-            self.classification_clicked.set(str(employee.classification))
+            
+            if str(employee.classification):       
+                self.classification_clicked.set(str(employee.classification))
+            else:
+                self.classification_clicked.set('- Select -')
+                
             self.classification_dropdown = mycombobox(self.view_frame, value=
                 classList, textvariable=self.classification_clicked)
             self.classification_dropdown.grid(column=2, row=10)
@@ -847,7 +851,12 @@ class emp_page(tk.Frame):
             self.payment_method_clicked = StringVar(
                 self.view_frame, value='', name='payment_method_clicked_val')
             self.payment_method_clicked.trace('w', pay_method_dropdown_func)
-            self.payment_method_clicked.set(str(employee.pay_method))
+            
+            if str(employee.pay_method):
+                self.payment_method_clicked.set(str(employee.pay_method))
+            else:
+                self.classification_clicked.set('- Select -')
+                
             self.payment_method_dropdown = mycombobox(
                 self.view_frame, textvariable=self.payment_method_clicked, value=paymentMethodList)
             self.payment_method_dropdown.grid(column=4, row=3)
@@ -855,7 +864,12 @@ class emp_page(tk.Frame):
             permissionList = ["- Select -", "employee", "admin"]
             self.permission_level_clicked = StringVar(
                 self.view_frame, value='', name='permission_level_clicked_val')
-            self.permission_level_clicked.set(employee.permission)
+            
+            if employee.permission:
+                self.permission_level_clicked.set(employee.permission)
+            else:
+                self.classification_clicked.set('- Select -')
+                
             self.permission_level_dropdown = mycombobox(
                 self.view_frame, textvariable=self.permission_level_clicked, value=permissionList)
             self.permission_level_dropdown.grid(column=6, row=2)
@@ -912,23 +926,53 @@ class admin_page(tk.Frame):
         label = tk.Label(self, text="Admin Page", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
         self.offsetx = 0
+        self.filterVar = 'Last Name'
         s = ttk.Style()
         s.theme_use('clam')
         s.configure('Treeview', rowheight=30)
+        
+        def remove_init_text(event):
+            if event.widget.get() == "Search by Last Name" or event.widget.get() == "Search by ID":
+                event.widget['fg'] = 'black'
+                event.widget.delete(0, END)
 
-        # !!! REMINDER !!! -> Remove border when done formatting
-        self.btn_frame = LabelFrame(self, border=True)
+        def set_filterVar(*args):
+            if self.searchFilterClick.get() != 'Filter':
+                self.filterVar = self.searchFilterClick.get()
+                self.search_var.set("Search by {0}".format(self.filterVar))
+                
+        def searchFocusOut(event):
+            if not self.search_var.get():
+                event.widget['fg'] = 'grey'
+                self.search_var.set("Search by {0}".format(self.filterVar))
+        
+        self.btn_frame = LabelFrame(self)
         self.btn_frame.pack(side='bottom', fill=BOTH)
-        # SearchIcon = PhotoImage(file = 'emp_data_project/emp_data/SearchIcon.png')
-        # photoimage = SearchIcon.subsample(1, 1)
         self.offsetx = -35
+        
         self.searchEmp_Btn = Button(self, text="Search", font=(
             'Arial', 10), command=lambda: self.search_for_emp()).place(x=710 + self.offsetx, y=420)
-        # self.searchEmp_icon = Label(self, image=photoimage).grid(x=0,y=1)
-        self.searchEmp_entry = Entry(
-            self, font=('Arial', 10)).place(x=550 + self.offsetx, y=420)
+        
+        
+        self.search_var = StringVar()
+        self.search_var.set("Search by {0}".format(self.filterVar))
+        self.searchEmp_entry = Entry(self, textvariable = self.search_var, font=('Arial', 10), fg='grey')
+        self.searchEmp_entry.bind('<FocusIn>', remove_init_text)
+        self.searchEmp_entry.bind('<FocusOut>', searchFocusOut)
+        self.searchEmp_entry.place(x=550 + self.offsetx, y=420)
+        self.search_var.trace('w', self.search_for_emp)
+        
+        
+        self.filters = ('Last Name','ID')
+        self.searchFilterClick = StringVar()
+        self.searchFilterClick.trace('w', set_filterVar)
+        self.searchFilterClick.set('Filter')
+        self.searchFilter_dropdown = OptionMenu(self, self.searchFilterClick, *self.filters)
+        self.searchFilter_dropdown.place(x=770 + self.offsetx, y=420)
+        
         self.addEmpBtn = tk.Button(
             self, text="Add New Employee", command=lambda: self.add_emp()).place(x=550, y=460)
+        
         self.columns_list = ("emp_ip_column", "first_name_column", "last_name_column",
                              "phone_number_column", "email_column", "start_date_column",
                              "end_date_column", "classification_column", "title_column",
@@ -966,9 +1010,54 @@ class admin_page(tk.Frame):
         self.emp_tree.bind("<Double 1>", self.selected_employee)
         self.emp_tree.pack()
 
-    def search_for_emp(self):
-        pass
 
+    def search_for_emp(self, *args):
+        self.lookup_record = self.searchEmp_entry.get()
+        if self.lookup_record == 'Search by Last Name' or self.lookup_record == 'Search by ID':
+            return
+        #take the string currently in the widget, all the way up to the last character
+        if self.filterVar == 'ID':
+            if not self.lookup_record.isdigit() and self.lookup_record:
+                self.searchEmp_entry.delete(0,END)
+                self.searchEmp_entry.insert(0,self.lookup_record[:-1])
+                return
+        elif self.filterVar == 'Last Name':
+            if self.lookup_record.isdigit() and self.lookup_record:
+                self.searchEmp_entry.delete(0,END)
+                self.searchEmp_entry.insert(0,self.lookup_record[:-1])
+                return
+            
+        ItemsInTreeView = self.emp_tree.get_children()
+        self.filteredOut = {}
+        
+        # Clear the Treeview
+        for record in self.emp_tree.get_children():
+            self.emp_tree.delete(record)
+            
+        for emp in EmpDat.emp_list:
+            indexDict = {
+                'ID': emp.id,
+                'Last Name': emp.last_name.lower()
+            }
+            if self.lookup_record.lower() in str(indexDict[self.filterVar])[0:len(self.lookup_record)]:
+                self.emp_tree.insert('', END, values=(emp.id, emp.first_name,
+                                                      emp.last_name, emp.phone, emp.email,
+                                                      emp.start_date, emp.end_date,
+                                                      str(emp.classification), emp.title, emp.dept))
+            
+        
+        # for eachItem in ItemsInTreeView:
+        #     if search not in self.emp_tree.item(eachItem)['values'][indexDict[self.filterVar]][0:len(search)].lower():
+        #         # search_var = self.emp_tree.item(eachItem)['values']
+        #         # self.emp_tree.delete(eachItem)
+        #         # self.emp_tree.insert("",0,values=search_var)
+        #         self.filteredOut[eachItem] = self.emp_tree.item(eachItem)['values']
+        #         self.emp_tree.delete(eachItem)
+        #     else:
+        #         for key, value in self.filteredOut.items():   
+        #             if search in value[indexDict[self.filterVar]][0:len(search)].lower():
+        #                 self.emp_tree.insert("",0,values=self.filteredOut[eachItem])
+    
     def add_emp(self):
         max_id = 0
         for emp in EmpDat.emp_list + EmpDat.archived_list:
