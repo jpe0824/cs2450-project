@@ -931,45 +931,30 @@ class admin_page(tk.Frame):
         s.theme_use('clam')
         s.configure('Treeview', rowheight=30)
         
-        def remove_init_text(event):
-            if event.widget.get() == "Search by Last Name" or event.widget.get() == "Search by ID":
-                event.widget['fg'] = 'black'
-                event.widget.delete(0, END)
-
-        def set_filterVar(*args):
-            if self.searchFilterClick.get() != 'Filter':
-                self.filterVar = self.searchFilterClick.get()
-                self.searchEmp_entry.configure(fg='grey')
-                self.search_var.set("Search by {0}".format(self.filterVar))
-                
-        def searchFocusOut(event):
-            if not self.search_var.get():
-                event.widget['fg'] = 'grey'
-                self.search_var.set("Search by {0}".format(self.filterVar))
         
         self.btn_frame = LabelFrame(self)
         self.btn_frame.pack(side='bottom', fill=BOTH)
         self.offsetx = -35
         
-        self.searchEmp_Btn = Button(self, text="Search", font=(
-            'Arial', 10), command=lambda: self.search_for_emp()).place(x=710 + self.offsetx, y=420)
+        # self.searchEmp_Btn = Button(self, text="Search", font=(
+        #     'Arial', 10), command=lambda: self.search_for_emp()).place(x=710 + self.offsetx, y=420)
         
         
         self.search_var = StringVar()
         self.search_var.set("Search by {0}".format(self.filterVar))
         self.searchEmp_entry = Entry(self, textvariable = self.search_var, font=('Arial', 10), fg='grey')
-        self.searchEmp_entry.bind('<FocusIn>', remove_init_text)
-        self.searchEmp_entry.bind('<FocusOut>', searchFocusOut)
+        self.searchEmp_entry.bind('<FocusIn>', self.remove_init_text)
+        self.searchEmp_entry.bind('<FocusOut>', self.searchFocusOut)
         self.searchEmp_entry.place(x=550 + self.offsetx, y=420)
         self.search_var.trace('w', self.search_for_emp)
         
         
         self.filters = ('Last Name','ID')
         self.searchFilterClick = StringVar()
-        self.searchFilterClick.trace('w', set_filterVar)
+        self.searchFilterClick.trace('w', self.set_filterVar)
         self.searchFilterClick.set('Filter')
         self.searchFilter_dropdown = OptionMenu(self, self.searchFilterClick, *self.filters)
-        self.searchFilter_dropdown.place(x=770 + self.offsetx, y=420)
+        self.searchFilter_dropdown.place(x=710 + self.offsetx, y=420)
         
         self.addEmpBtn = tk.Button(
             self, text="Add New Employee", command=lambda: self.add_emp()).place(x=550, y=460)
@@ -1011,6 +996,22 @@ class admin_page(tk.Frame):
         self.emp_tree.bind("<Double 1>", self.selected_employee)
         self.emp_tree.pack()
 
+    def remove_init_text(self,event):
+        if event.widget.get() == "Search by Last Name" or event.widget.get() == "Search by ID":
+            event.widget['fg'] = 'black'
+            event.widget.delete(0, END)
+
+    def set_filterVar(self,*args):
+        self.focus_set()
+        if self.searchFilterClick.get() != 'Filter':
+            self.filterVar = self.searchFilterClick.get()
+            self.searchEmp_entry.configure(fg='grey')
+            self.search_var.set("Search by {0}".format(self.filterVar))
+            
+    def searchFocusOut(self,event):
+        if not self.search_var.get():
+            event.widget['fg'] = 'grey'
+            self.search_var.set("Search by {0}".format(self.filterVar))
 
     def search_for_emp(self, *args):
         self.lookup_record = self.searchEmp_entry.get()
