@@ -458,40 +458,40 @@ class EmployeeDB:
         self.EMPLOYEE_TYPE_INDEX = 2
         self.ID_NUMBER_INDEX = 20
         
-        if not os.path.exists("emp_data_project/emp_data/employees.csv"):
-            with open("emp_data_project/emp_data/employees.csv", 'x', encoding="utf8", ) as database:
+        if not os.path.exists("./employees.csv"):
+            with open("./employees.csv", 'x', encoding="utf8", ) as database:
                 writer = csv.writer(database)
                 writer.writerow(
                     "ID,Name,Address,City,State,Zip,Classification," \
                     "Pay_Method,Salary,Hourly,Commission,Route,Account," \
                     "Birth_Date,SSN,Phone,Email,Start_Date,End_Date," \
                     "Title,Dept,Permission,Password".split(','))
-                self.database = open("emp_data_project/emp_data/employees.csv", encoding="utf8", )
+                self.database = open("./employees.csv", encoding="utf8", )
                 
         else:
-            self.database = open("emp_data_project/emp_data/employees.csv", encoding="utf8")
+            self.database = open("./employees.csv", encoding="utf8")
 
         # Make Admin csv file if it doesn't exist
-        if not os.path.exists("emp_data_project/emp_data/admins.csv"):
-            with open("emp_data_project/emp_data/admins.csv", "x", encoding="utf8") as database:
+        if not os.path.exists("./admins.csv"):
+            with open("./admins.csv", "x", encoding="utf8") as database:
                 writer = csv.writer(database)
                 writer.writerow("ID,Name".split(','))
-                self.admins = open("emp_data_project/emp_data/admins.csv", encoding="utf8")
+                self.admins = open("./admins.csv", encoding="utf8")
         else:
-            self.admins = open("emp_data_project/emp_data/admins.csv", encoding="utf8")
+            self.admins = open("./admins.csv", encoding="utf8")
 
-        if not os.path.exists("emp_data_project/emp_data/archived.csv"):
-            with open("emp_data_project/emp_data/archived.csv", "x", encoding="utf8") as database:
+        if not os.path.exists("./archived.csv"):
+            with open("./archived.csv", "x", encoding="utf8") as database:
                 writer = csv.writer(database)
                 writer.writerow(
                     "ID,Name,Address,City,State,Zip,Classification," \
                     "Pay_Method,Salary,Hourly,Commission,Route,Account," \
                     "Birth_Date,SSN,Phone,Email,Start_Date,End_Date," \
                     "Title,Dept,Permission,Password".split(','))
-                self.archived = open("emp_data_project/emp_data/archived.csv", encoding="utf8")
+                self.archived = open("./archived.csv", encoding="utf8")
                 
         else:
-            self.archived = open("emp_data_project/emp_data/archived.csv", 'r', encoding="utf8")
+            self.archived = open("./archived.csv", 'r', encoding="utf8")
         self.emp_list = []
         self.archived_list = []
         self.update_emp_list()
@@ -523,7 +523,7 @@ class EmployeeDB:
         employee.job_status = 'unactive'
         self.emp_list.remove(employee)
         self.archived_list.append(employee)
-        _add_row(employee, "emp_data_project/emp_data/archived.csv")
+        _add_row(employee, "./archived.csv")
 
 
     def add_employee(self, employee: Employee):
@@ -532,7 +532,7 @@ class EmployeeDB:
         """
         employee.job_status = 'active'
         self.emp_list.append(employee)
-        _add_row(employee, "emp_data_project/emp_data/employees.csv")
+        _add_row(employee, "./employees.csv")
 
     def edit_employee(self, id_num, fields: list, data: list):
         """
@@ -543,7 +543,7 @@ class EmployeeDB:
         open("temp/employees.csv", "w",newline='') in on line 616
         of open("employees.csv", "w",newline='')
         """
-        with open("emp_data_project/emp_data/employees.csv", encoding="utf8") as database:
+        with open("./employees.csv", encoding="utf8") as database:
             emp_dict = csv.DictReader(database)
             temp = []
             for row in emp_dict:
@@ -554,7 +554,7 @@ class EmployeeDB:
                         # Print out fields and data lists.
                         temp_row[fields[index]] = data[index]
                 temp.append(temp_row)
-        with open("emp_data_project/emp_data/employees.csv", "w", newline='', encoding="utf8") as temp_db:
+        with open("./employees.csv", "w", newline='', encoding="utf8") as temp_db:
             fieldnames = "ID,Name,Address,City,State,Zip,Classification," \
                          "Pay_Method,Salary,Hourly,Commission,Route,Account," \
                          "Birth_Date,SSN,Phone,Email,Start_Date,End_Date," \
