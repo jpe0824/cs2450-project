@@ -204,6 +204,9 @@ class emp_page(tk.Frame):
 
         self.backBtn = tk.Button(self.view_frame, text='Back',
                                  command=lambda: self.controller.show_frame("admin_page"))
+        
+        self.PayStubBtn = tk.Button(self.view_frame, text='Get Pay Stub',
+                                 command= self.getPayStub)
 
         self.submitBtn = tk.Button(
             self.view_frame, text='Submit', command=lambda: self.make_new_employee())
@@ -215,6 +218,9 @@ class emp_page(tk.Frame):
             self.view_frame, text='Cancel', command=lambda: self.cancel_edit_emp())
 
     # Clears all data fields in employee page to fill in new employee info
+    
+    def getPayStub(self):
+        pass
 
     def add_emp_innit(self):
         self.parse_entry('parse', 'normal')
@@ -491,7 +497,7 @@ class emp_page(tk.Frame):
                         else:
                             self.controller.frames['emp_page'].view_frame.children[x]['state'] = state
                         if self.mode == 'add employee':
-                            if ('entry') in x:
+                            if ('entry') in x and x not in ('dob_entry','start_date_entry','end_date_entry'):
                                 self.controller.frames['emp_page'].view_frame.children[x].delete(
                                     0, END)
                 elif self.controller.user.permission == 'employee':
@@ -681,6 +687,11 @@ class emp_page(tk.Frame):
             self.DOB_entry.config(fg='grey')
         self.DOB_entry.bind('<FocusIn>', remove_highlight)
         self.DOB_entry.bind('<FocusOut>', date_hasVal)
+        
+        if not self.DOB_entry.get() or self.DOB_entry.get() == 'MM/DD/YYYY':
+            self.DOB_entry.configure(fg = 'grey')
+            self.DOB_entry.insert(0,'MM/DD/YYYY')
+            
 
         self.SSN_label = tk.Label(
             self.view_frame, name='ssn_label', justify='right', text="SSN:", font=('Arial', 10))
@@ -745,6 +756,8 @@ class emp_page(tk.Frame):
 
         self.permission_level_label = tk.Label(
             self.view_frame, name='permission_level_label', justify='right', text="Permission Level:", font=('Arial', 10))
+        
+        
 
         def updateCol3():
             self.job_title_label.grid(
@@ -852,10 +865,10 @@ class emp_page(tk.Frame):
                 self.view_frame, value='', name='payment_method_clicked_val')
             self.payment_method_clicked.trace('w', pay_method_dropdown_func)
             
-            if str(employee.pay_method):
+            if str(employee.pay_method) != 'None':
                 self.payment_method_clicked.set(str(employee.pay_method))
             else:
-                self.classification_clicked.set('- Select -')
+                self.payment_method_clicked.set('- Select -')
                 
             self.payment_method_dropdown = mycombobox(
                 self.view_frame, textvariable=self.payment_method_clicked, value=paymentMethodList)
@@ -868,7 +881,7 @@ class emp_page(tk.Frame):
             if employee.permission:
                 self.permission_level_clicked.set(employee.permission)
             else:
-                self.classification_clicked.set('- Select -')
+                self.permission_level_clicked.set('- Select -')
                 
             self.permission_level_dropdown = mycombobox(
                 self.view_frame, textvariable=self.permission_level_clicked, value=permissionList)
@@ -936,9 +949,6 @@ class admin_page(tk.Frame):
         self.btn_frame.pack(side='bottom', fill=BOTH)
         self.offsetx = -35
         
-        # self.searchEmp_Btn = Button(self, text="Search", font=(
-        #     'Arial', 10), command=lambda: self.search_for_emp()).place(x=710 + self.offsetx, y=420)
-        
         
         self.search_var = StringVar()
         self.search_var.set("Search by {0}".format(self.filterVar))
@@ -958,6 +968,9 @@ class admin_page(tk.Frame):
         
         self.addEmpBtn = tk.Button(
             self, text="Add New Employee", command=lambda: self.add_emp()).place(x=550, y=460)
+        
+        self.reportsBtn = tk.Button(
+            self, text="Generate Report", command=lambda: self.employee_reports()).place(x=550, y=500)
         
         self.columns_list = ("emp_ip_column", "first_name_column", "last_name_column",
                              "phone_number_column", "email_column", "start_date_column",
@@ -995,6 +1008,107 @@ class admin_page(tk.Frame):
         self.emp_tree_init()
         self.emp_tree.bind("<Double 1>", self.selected_employee)
         self.emp_tree.pack()
+        
+      
+    def employee_reports(self):
+        responce = askyesno("Employee Report", "Do you want to include archived employees in the report?")
+        if responce is True:
+            self.make_employee_reports(True)
+        else:
+            self.make_employee_reports(False)
+            
+    def make_employee_reports(self, condition):
+        if condition:
+            emp_list = EmpDat.emp_list + EmpDat.archived_list
+        else:
+            emp_list = EmpDat.emp_list
+        
+        self.read_timecards()
+        self.read_receipts() 
+        
+        with open("report.csv", "w", encoding="utf8") as report:
+            for employee in emp_list:
+                if str(employee.classification) == "hourly":
+                    classVar = f"Hourly pay: " \
+                                f"${employee.classification.hourly_rate:.2f}    "
+                    if str(employee.pay_method) == "direct deposit":
+                        direct_deposit_var = f"Routing num: {employee.pay_method.route_num}  " \
+                                            f" Account num: " \
+                                            f"{employee.pay_method.account_num} Date of " 
+                    elif str(employee.pay_method) == "mail":
+                        direct_deposit_var = ''
+                elif str(employee.classification) == "salary":
+                    classVar = f"Salary: ${employee.classification.salary:.2f} "
+                    if str(employee.pay_method) == "direct deposit":
+                        direct_deposit_var = f"Routing number: " \
+                                f"{employee.pay_method.route_num} " \
+                                f"Account number: " \
+                                f"{employee.pay_method.account_num}    Date of " 
+                    elif str(employee.pay_method) == "mail":
+                        direct_deposit_var = ''
+                elif str(employee.classification) == "commissioned":
+                    classVar = f"Salary: ${employee.classification.salary:.2f} " \
+                            f"         Commission rate: " \
+                            f"${employee.classification.commission_rate:.2f}" \
+                            f"\n"
+                    if str(employee.pay_method) == "direct deposit":
+                        direct_deposit_var = f" number: {employee.pay_method.route_num} " \
+                             f"Account number: " \
+                             f"{employee.pay_method.account_num}\n" 
+                    elif str(employee.pay_method) == "mail":
+                        direct_deposit_var = ''
+                        
+                    
+                string = f"Employee ID: {employee.id}       Name: " \
+                             f"{employee.name}         Address: " \
+                             f"{employee.full_address()}\n" \
+                             f"Classification: {employee.classification}    " \
+                            + classVar \
+                             + f"   Payment method: {employee.pay_method}\n" \
+                             + direct_deposit_var \
+                             + f"birth: {employee.birth_date}\n" \
+                             f"SSN: {employee.ssn}          Phone: " \
+                             f"{employee.phone}     Email: {employee.email}\n" \
+                             f"Start date: {employee.start_date}     " \
+                             f"End date: {employee.end_date}\n" \
+                             f"Title: {employee.title}           Dept: " \
+                             f"{employee.dept}\n" \
+                             f"Permission level: {employee.permission}\n\n"
+                report.write(string)
+        pay_report = employee.payment_report()
+        report.write(f"\t{pay_report}\n\n\n")
+        
+    def read_receipts(self):
+        """Reads in all receipt lists from the "receipts.csv" file, and adds
+        them to the commissioned employees' individual records.
+        """
+        with open("receipts.csv", 'r', encoding="utf8") as receipts:
+            for line in receipts:
+                sales = line.split(',')
+                emp_id = int(sales.pop(0))
+                employee = find_employee_by_id(emp_id, EmpDat.emp_list)
+
+                if employee:
+                    if str(employee.classification) == "commissioned":
+                        for receipt in sales:
+                            employee.classification.add_receipt(float(receipt))
+    
+    def read_timecards(self):
+        """Reads in all timecard lists from the "timecards.csv" file, and adds
+        them to the hourly employees' individual records.
+        """
+        with open("timecards.csv", 'r', encoding="utf8") as timecards:
+            for line in timecards:
+                times = line.split(',')
+                emp_id = int(times.pop(0))
+                employee = find_employee_by_id(emp_id, EmpDat.emp_list)
+
+                if employee:
+                    if str(employee.classification) == "hourly":
+                        for time in times:
+                            employee.classification.add_timecard(float(time))
+    
+    
 
     def remove_init_text(self,event):
         if event.widget.get() == "Search by Last Name" or event.widget.get() == "Search by ID":
@@ -1046,19 +1160,6 @@ class admin_page(tk.Frame):
                                                       emp.last_name, emp.phone, emp.email,
                                                       emp.start_date, emp.end_date,
                                                       str(emp.classification), emp.title, emp.dept))
-            
-        
-        # for eachItem in ItemsInTreeView:
-        #     if search not in self.emp_tree.item(eachItem)['values'][indexDict[self.filterVar]][0:len(search)].lower():
-        #         # search_var = self.emp_tree.item(eachItem)['values']
-        #         # self.emp_tree.delete(eachItem)
-        #         # self.emp_tree.insert("",0,values=search_var)
-        #         self.filteredOut[eachItem] = self.emp_tree.item(eachItem)['values']
-        #         self.emp_tree.delete(eachItem)
-        #     else:
-        #         for key, value in self.filteredOut.items():   
-        #             if search in value[indexDict[self.filterVar]][0:len(search)].lower():
-        #                 self.emp_tree.insert("",0,values=self.filteredOut[eachItem])
     
     def add_emp(self):
         max_id = 0
