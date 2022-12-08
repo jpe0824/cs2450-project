@@ -9,6 +9,7 @@ import itertools as it
 # from PIL import Image, ImageTk
 import uuid
 import os
+from prettytable import PrettyTable
 
 # from example_database import *
 from Database import *
@@ -1026,57 +1027,88 @@ class admin_page(tk.Frame):
         self.read_timecards()
         self.read_receipts() 
         
-        with open("report.csv", "w", encoding="utf8") as report:
+        with open("./report.csv", "w", encoding="utf8") as report:
             for employee in emp_list:
-                if str(employee.classification) == "hourly":
-                    classVar = f"Hourly pay: " \
-                                f"${employee.classification.hourly_rate:.2f}    "
-                    if str(employee.pay_method) == "direct deposit":
-                        direct_deposit_var = f"Routing num: {employee.pay_method.route_num}  " \
-                                            f" Account num: " \
-                                            f"{employee.pay_method.account_num} Date of " 
-                    elif str(employee.pay_method) == "mail":
-                        direct_deposit_var = ''
-                elif str(employee.classification) == "salary":
-                    classVar = f"Salary: ${employee.classification.salary:.2f} "
-                    if str(employee.pay_method) == "direct deposit":
-                        direct_deposit_var = f"Routing number: " \
-                                f"{employee.pay_method.route_num} " \
-                                f"Account number: " \
-                                f"{employee.pay_method.account_num}    Date of " 
-                    elif str(employee.pay_method) == "mail":
-                        direct_deposit_var = ''
-                elif str(employee.classification) == "commissioned":
-                    classVar = f"Salary: ${employee.classification.salary:.2f} " \
-                            f"         Commission rate: " \
-                            f"${employee.classification.commission_rate:.2f}" \
-                            f"\n"
-                    if str(employee.pay_method) == "direct deposit":
-                        direct_deposit_var = f" number: {employee.pay_method.route_num} " \
-                             f"Account number: " \
-                             f"{employee.pay_method.account_num}\n" 
-                    elif str(employee.pay_method) == "mail":
-                        direct_deposit_var = ''
+                payment_info_var = ['NA', 'NA']
+                if str(employee.classification) == "Hourly":
+                    classVar = employee.classification.hourly_rate
+                    if str(employee.pay_method) == "Direct Deposit":
+                        payment_info_var[0],payment_info_var[1] = employee.pay_method.route_num, employee.pay_method.account_num
+                elif str(employee.classification) == "Salary":
+                    classVar = employee.classification.salary
+                    if str(employee.pay_method) == "Direct Deposit":
+                        payment_info_var[0],payment_info_var[1] = employee.pay_method.route_num, employee.pay_method.account_num 
+                elif str(employee.classification) == "Commissioned":
+                    classVar  = employee.classification.salary, employee.classification.commission_rate
+                    if str(employee.pay_method) == "Direct Deposit":
+                        payment_info_var[0],payment_info_var[1] = employee.pay_method.route_num, employee.pay_method.account_num
                         
                     
-                string = f"Employee ID: {employee.id}       Name: " \
-                             f"{employee.name}         Address: " \
-                             f"{employee.full_address()}\n" \
-                             f"Classification: {employee.classification}    " \
-                            + classVar \
-                             + f"   Payment method: {employee.pay_method}\n" \
-                             + direct_deposit_var \
-                             + f"birth: {employee.birth_date}\n" \
-                             f"SSN: {employee.ssn}          Phone: " \
-                             f"{employee.phone}     Email: {employee.email}\n" \
-                             f"Start date: {employee.start_date}     " \
-                             f"End date: {employee.end_date}\n" \
-                             f"Title: {employee.title}           Dept: " \
-                             f"{employee.dept}\n" \
-                             f"Permission level: {employee.permission}\n\n"
-                report.write(string)
-        pay_report = employee.payment_report()
-        report.write(f"\t{pay_report}\n\n\n")
+                string = [employee.id, employee.name, employee.full_address(),
+                        employee.classification, classVar, employee.pay_method,
+                        payment_info_var[0], payment_info_var[1], employee.birth_date,
+                        employee.ssn, employee.phone, employee.email, 
+                        employee.start_date, employee.end_date, employee.title, 
+                        employee.dept,
+                        employee.permission,
+                        employee.payment_report(),
+                        '\n'
+                ]
+                report.write(','.join([str(x) for x in string]))
+        self.open_report_window()
+                
+    def open_report_window(self):
+        report_window = Tk()
+        report_window.geometry("1475x700")
+        # Create Textbox for report data
+        report_text = Text(report_window, width=120, height=100)
+        # Add report data to textbox
+        with open("report.csv", 'r', encoding="utf8") as file:
+            reportDict = PrettyTable(['', ' ', '  '])
+            reportDict.align = 'l'
+            csv_reader = csv.reader(file)
+            for line in csv_reader:
+                if line[5] == 'Hourly':
+                    reportDict.add_row([f"Employee ID: {line[0]}",f"Name: {line[1]}",f"Address: {' '.join(line[2:5])}"])
+                    reportDict.add_row([f"Classification: {line[5]}",f"Hourly Pay: {line[6].replace('(','')}",f"Payment Method: {line[8]}"])
+                    reportDict.add_row([f"Routing num: {line[9]}",f"Account Number: {line[10]}",f"Date of Birth: {line[11]}"])
+                    reportDict.add_row([f"SSN: {line[12]}",f"Phone Number: {line[13]}",f"Email: {line[14]}"])
+                    reportDict.add_row([f"Start date: {line[15]}",f"End Date: {line[16]}",''])
+                    reportDict.add_row([f"Title: {line[16]}",f"Department: {line[17]}",''])
+                    reportDict.add_row([f"Permission level: {line[18]}",'',''])
+                elif line[5] == 'Salary':
+                    reportDict.add_row([f"Employee ID: {line[0]}",f"Name: {line[1]}",f"Address: {' '.join(line[2:5])}"])
+                    reportDict.add_row([f"Classification: {line[5]}",f"Salary: {line[6].replace('(','')}",f"Payment Method: {line[8]}"])
+                    reportDict.add_row([f"Routing num: {line[9]}",f"Account Number: {line[10]}",f"Date of Birth: {line[11]}"])
+                    reportDict.add_row([f"SSN: {line[12]}",f"Phone Number: {line[13]}",f"Email: {line[14]}"])
+                    reportDict.add_row([f"Start date: {line[15]}",f"End Date: {line[16]}",''])
+                    reportDict.add_row([f"Title: {line[16]}",f"Department: {line[17]}",''])
+                    reportDict.add_row([f"Permission level: {line[18]}",'',''])
+                elif line[5] == 'Commissioned':
+                    reportDict.add_row([f"Employee ID: {line[0]}",f"Name: {line[1]}",f"Address: {' '.join(line[2:5])}"])
+                    reportDict.add_row([f"Classification: {line[5]}",f"Salary: {line[6].replace('(','')}",f"Commision Rate: {line[7].replace(')','')}"])
+                    reportDict.add_row([f"Payment Method: {line[8]}", f"Routing num: {line[9]}",f"Account Number: {line[10]}"])
+                    reportDict.add_row([f"Date of Birth: {line[11]}", f"SSN: {line[12]}",f"Phone Number: {line[13]}"])
+                    reportDict.add_row([f"Email: {line[14]}", f"Start date: {line[15]}",f"End Date: {line[16]}"])
+                    reportDict.add_row([f"Title: {line[16]}",f"Department: {line[17]}",''])
+                    reportDict.add_row([f"Permission level: {line[18]}",'',''])
+                reportDict.add_row([f"\n{' '.join(line[19:22])}",'','\n\n'])
+                    
+
+        print(reportDict)   
+        report_text.insert(1.0,reportDict)   
+        report_text.pack(side=LEFT)
+        report_text.config(state='disabled')
+
+        # Scrollbar
+        report_scrollbar = Scrollbar(report_window)
+        report_scrollbar.pack(side=RIGHT, fill=Y)
+
+        # Attach scrollbar to textbox
+        report_text.config(yscrollcommand=report_scrollbar.set)
+        report_scrollbar.config(command=report_text.yview)
+
+        report_window.mainloop()
         
     def read_receipts(self):
         """Reads in all receipt lists from the "receipts.csv" file, and adds
@@ -1089,7 +1121,7 @@ class admin_page(tk.Frame):
                 employee = find_employee_by_id(emp_id, EmpDat.emp_list)
 
                 if employee:
-                    if str(employee.classification) == "commissioned":
+                    if str(employee.classification) == "Commissioned":
                         for receipt in sales:
                             employee.classification.add_receipt(float(receipt))
     
@@ -1104,7 +1136,7 @@ class admin_page(tk.Frame):
                 employee = find_employee_by_id(emp_id, EmpDat.emp_list)
 
                 if employee:
-                    if str(employee.classification) == "hourly":
+                    if str(employee.classification) == "Hourly":
                         for time in times:
                             employee.classification.add_timecard(float(time))
     

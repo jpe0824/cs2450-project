@@ -177,7 +177,8 @@ class PayMethod():
         """Initialize data members.
         Input: Employee object ("employee" param)
         """
-        self.employee = " ".join([employee.first_name, employee.last_name])
+        # self.employee = " ".join([employee.first_name, employee.last_name])
+        self.employee = employee
 
     def payment_message(self, amount):
         """Used to print an applicable message about how much employee
