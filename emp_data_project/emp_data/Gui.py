@@ -6,12 +6,10 @@ from tkinter import font as tkfont
 from tkinter import ttk
 import re
 import itertools as it
-# from PIL import Image, ImageTk
-import uuid
 import os
-from prettytable import PrettyTable
+from tkinter import filedialog
 
-# from example_database import *
+
 from Database import *
 EmpDat = EmployeeDB()
 
@@ -148,14 +146,15 @@ class LoginPage(tk.Frame):
     def validateLogin(self, username, password):
         valid_username = False
         valid_password = False
-        for employee in EmpDat.emp_list:
+        
+        for employee in EmpDat.admin_list + EmpDat.emp_list:
             try:
                 if employee.id == int(username):
                     valid_username = True
-                if employee.password == password:
-                    valid_password = True
-                    self.controller.employee = employee
-                    break
+                    if employee.password == password:
+                        valid_password = True
+                        self.controller.employee = employee
+                        break
             except ValueError:
                 continue
 
@@ -941,13 +940,11 @@ class admin_page(tk.Frame):
         label.pack(side="top", fill="x", pady=10)
         self.offsetx = 0
         self.filterVar = 'Last Name'
+        self.file_path = None
         s = ttk.Style()
         s.theme_use('clam')
         s.configure('Treeview', rowheight=30)
         
-        
-        self.btn_frame = LabelFrame(self)
-        self.btn_frame.pack(side='bottom', fill=BOTH)
         self.offsetx = -35
         
         
@@ -1012,103 +1009,177 @@ class admin_page(tk.Frame):
         
       
     def employee_reports(self):
-        responce = askyesno("Employee Report", "Do you want to include archived employees in the report?")
-        if responce is True:
-            self.make_employee_reports(True)
-        else:
-            self.make_employee_reports(False)
+        
+        
+        # responce = askyesno("Employee Report", "Do you want to include archived employees in the report?")
+        # if responce is True:
+        #     self.make_employee_reports(True)
+        # else:
+        #     self.make_employee_reports(False)
+        
+        def get_file_path():
+            self.popup_window.withdraw()
+            self.file_path = filedialog.askdirectory(initialdir='./', title='Select A File')
+            self.popup_window.deiconify()
+            self.fileSelectEntry.configure(state=NORMAL)
+            self.fileSelectEntry.insert(0,self.file_path)
+            self.fileSelectEntry.configure(state=DISABLED)
+            
+            
+        def downloadDB():
+            if not self.file_path:
+                messagebox.showwarning("Warning", "You must select where you want to export CSV to!")
+            elif any([self.adminVar.get(), self.employeeVar.get(), self.archivedVar.get()]):
+                exportList = []
+                if self.adminVar.get():
+                    exportList += EmpDat.admin_list
+                if self.employeeVar.get():
+                    exportList += EmpDat.emp_list
+                if self.archivedVar.get():
+                    exportList += EmpDat.archived_list
+                
+                for employee in exportList:
+                        exportDB(employee, self.file_path+'/exportedDatabase.csv')
+                    
+                # with open(self.file_path + '/exportedDatabase.csv', 'w', encoding="utf8") as database:
+                #     writer = csv.writer(database)
+                #     writer.writerow(
+                #         "ID,Name,Address,City,State,Zip,Classification," \
+                #         "Pay_Method,Salary,Hourly,Commission,Route,Account," \
+                #         "Birth_Date,SSN,Phone,Email,Start_Date,End_Date," \
+                #         "Title,Dept,Permission,Password".split(','))
+                    
+                        
+                #     # self.archived = open(self.file_path, encoding="utf8")
+                #     return
+                        
+            else:
+                messagebox.showwarning("Warning", "You must select atleast one database to export!")
+            
+        
+        self.popup_window = Tk()
+        self.popup_window.geometry('500x500')
+        self.popup_window.resizable(False,False)
+        self.popup_window.attributes('-topmost',True)
+        
+        Label(self.popup_window,text='Select which databases you want to export').pack(anchor=W)
+        
+        self.adminVar = IntVar(self.popup_window)
+        self.adminCheckBox = Checkbutton(self.popup_window, text='Admin Database', variable=self.adminVar)
+        self.adminCheckBox.pack(anchor=W)
+        
+        self.employeeVar = IntVar(self.popup_window)
+        self.employeeCheckBox = Checkbutton(self.popup_window, text='Employee Database', variable=self.employeeVar)
+        self.employeeCheckBox.pack(anchor=W)
+        
+        self.archivedVar = IntVar(self.popup_window)
+        self.archivedCheckBox = Checkbutton(self.popup_window, text='Archived Database', variable=self.archivedVar)
+        self.archivedCheckBox.pack(anchor=W)
+        
+        frame = Frame(self.popup_window)
+        
+        self.fileSelectBtn = Button(frame, text='File Select', command=get_file_path)
+        self.fileSelectBtn.grid(column=0,row=0, padx=5, pady=10)
+    
+        self.fileSelectEntry = Entry(frame, font=( 'Arial', 10), state=DISABLED)
+        self.fileSelectEntry.grid(column=1,row=0, pady=10)
+        frame.pack(anchor=W)
+        
+        self.downloadBtn = Button(self.popup_window, text='Download', command=downloadDB)
+        self.downloadBtn.pack(anchor=W,padx=5, pady=10)
             
     def make_employee_reports(self, condition):
         if condition:
             emp_list = EmpDat.emp_list + EmpDat.archived_list
         else:
             emp_list = EmpDat.emp_list
+            
         
-        self.read_timecards()
-        self.read_receipts() 
+        # self.read_timecards()
+        # self.read_receipts() 
         
-        with open("./report.csv", "w", encoding="utf8") as report:
-            for employee in emp_list:
-                payment_info_var = ['NA', 'NA']
-                if str(employee.classification) == "Hourly":
-                    classVar = employee.classification.hourly_rate
-                    if str(employee.pay_method) == "Direct Deposit":
-                        payment_info_var[0],payment_info_var[1] = employee.pay_method.route_num, employee.pay_method.account_num
-                elif str(employee.classification) == "Salary":
-                    classVar = employee.classification.salary
-                    if str(employee.pay_method) == "Direct Deposit":
-                        payment_info_var[0],payment_info_var[1] = employee.pay_method.route_num, employee.pay_method.account_num 
-                elif str(employee.classification) == "Commissioned":
-                    classVar  = employee.classification.salary, employee.classification.commission_rate
-                    if str(employee.pay_method) == "Direct Deposit":
-                        payment_info_var[0],payment_info_var[1] = employee.pay_method.route_num, employee.pay_method.account_num
+        # with open("./report.csv", "w", encoding="utf8") as report:
+        #     for employee in emp_list:
+        #         payment_info_var = ['NA', 'NA']
+        #         if str(employee.classification) == "Hourly":
+        #             classVar = employee.classification.hourly_rate
+        #             if str(employee.pay_method) == "Direct Deposit":
+        #                 payment_info_var[0],payment_info_var[1] = employee.pay_method.route_num, employee.pay_method.account_num
+        #         elif str(employee.classification) == "Salary":
+        #             classVar = employee.classification.salary
+        #             if str(employee.pay_method) == "Direct Deposit":
+        #                 payment_info_var[0],payment_info_var[1] = employee.pay_method.route_num, employee.pay_method.account_num 
+        #         elif str(employee.classification) == "Commissioned":
+        #             classVar  = employee.classification.salary, employee.classification.commission_rate
+        #             if str(employee.pay_method) == "Direct Deposit":
+        #                 payment_info_var[0],payment_info_var[1] = employee.pay_method.route_num, employee.pay_method.account_num
                         
                     
-                string = [employee.id, employee.name, employee.full_address(),
-                        employee.classification, classVar, employee.pay_method,
-                        payment_info_var[0], payment_info_var[1], employee.birth_date,
-                        employee.ssn, employee.phone, employee.email, 
-                        employee.start_date, employee.end_date, employee.title, 
-                        employee.dept,
-                        employee.permission,
-                        employee.payment_report(),
-                        '\n'
-                ]
-                report.write(','.join([str(x) for x in string]))
-        self.open_report_window()
+        #         string = [employee.id, employee.name, employee.full_address(),
+        #                 employee.classification, classVar, employee.pay_method,
+        #                 payment_info_var[0], payment_info_var[1], employee.birth_date,
+        #                 employee.ssn, employee.phone, employee.email, 
+        #                 employee.start_date, employee.end_date, employee.title, 
+        #                 employee.dept,
+        #                 employee.permission,
+        #                 employee.payment_report(),
+        #                 '\n'
+        #         ]
+        #         report.write(','.join([str(x) for x in string]))
+        # self.open_report_window()
                 
-    def open_report_window(self):
-        report_window = Tk()
-        report_window.geometry("1475x700")
-        # Create Textbox for report data
-        report_text = Text(report_window, width=120, height=100)
-        # Add report data to textbox
-        with open("report.csv", 'r', encoding="utf8") as file:
-            reportDict = PrettyTable(['', ' ', '  '])
-            reportDict.align = 'l'
-            csv_reader = csv.reader(file)
-            for line in csv_reader:
-                if line[5] == 'Hourly':
-                    reportDict.add_row([f"Employee ID: {line[0]}",f"Name: {line[1]}",f"Address: {' '.join(line[2:5])}"])
-                    reportDict.add_row([f"Classification: {line[5]}",f"Hourly Pay: {line[6].replace('(','')}",f"Payment Method: {line[8]}"])
-                    reportDict.add_row([f"Routing num: {line[9]}",f"Account Number: {line[10]}",f"Date of Birth: {line[11]}"])
-                    reportDict.add_row([f"SSN: {line[12]}",f"Phone Number: {line[13]}",f"Email: {line[14]}"])
-                    reportDict.add_row([f"Start date: {line[15]}",f"End Date: {line[16]}",''])
-                    reportDict.add_row([f"Title: {line[16]}",f"Department: {line[17]}",''])
-                    reportDict.add_row([f"Permission level: {line[18]}",'',''])
-                elif line[5] == 'Salary':
-                    reportDict.add_row([f"Employee ID: {line[0]}",f"Name: {line[1]}",f"Address: {' '.join(line[2:5])}"])
-                    reportDict.add_row([f"Classification: {line[5]}",f"Salary: {line[6].replace('(','')}",f"Payment Method: {line[8]}"])
-                    reportDict.add_row([f"Routing num: {line[9]}",f"Account Number: {line[10]}",f"Date of Birth: {line[11]}"])
-                    reportDict.add_row([f"SSN: {line[12]}",f"Phone Number: {line[13]}",f"Email: {line[14]}"])
-                    reportDict.add_row([f"Start date: {line[15]}",f"End Date: {line[16]}",''])
-                    reportDict.add_row([f"Title: {line[16]}",f"Department: {line[17]}",''])
-                    reportDict.add_row([f"Permission level: {line[18]}",'',''])
-                elif line[5] == 'Commissioned':
-                    reportDict.add_row([f"Employee ID: {line[0]}",f"Name: {line[1]}",f"Address: {' '.join(line[2:5])}"])
-                    reportDict.add_row([f"Classification: {line[5]}",f"Salary: {line[6].replace('(','')}",f"Commision Rate: {line[7].replace(')','')}"])
-                    reportDict.add_row([f"Payment Method: {line[8]}", f"Routing num: {line[9]}",f"Account Number: {line[10]}"])
-                    reportDict.add_row([f"Date of Birth: {line[11]}", f"SSN: {line[12]}",f"Phone Number: {line[13]}"])
-                    reportDict.add_row([f"Email: {line[14]}", f"Start date: {line[15]}",f"End Date: {line[16]}"])
-                    reportDict.add_row([f"Title: {line[16]}",f"Department: {line[17]}",''])
-                    reportDict.add_row([f"Permission level: {line[18]}",'',''])
-                reportDict.add_row([f"\n{' '.join(line[19:22])}",'','\n\n'])
+    # def open_report_window(self):
+    #     report_window = Tk()
+    #     report_window.geometry("1475x700")
+    #     # Create Textbox for report data
+    #     report_text = Text(report_window, width=120, height=100)
+    #     # Add report data to textbox
+    #     with open("report.csv", 'r', encoding="utf8") as file:
+    #         reportDict = PrettyTable(['', ' ', '  '])
+    #         reportDict.align = 'l'
+    #         csv_reader = csv.reader(file)
+    #         for line in csv_reader:
+    #             if line[5] == 'Hourly':
+    #                 reportDict.add_row([f"Employee ID: {line[0]}",f"Name: {line[1]}",f"Address: {' '.join(line[2:5])}"])
+    #                 reportDict.add_row([f"Classification: {line[5]}",f"Hourly Pay: {line[6].replace('(','')}",f"Payment Method: {line[8]}"])
+    #                 reportDict.add_row([f"Routing num: {line[9]}",f"Account Number: {line[10]}",f"Date of Birth: {line[11]}"])
+    #                 reportDict.add_row([f"SSN: {line[12]}",f"Phone Number: {line[13]}",f"Email: {line[14]}"])
+    #                 reportDict.add_row([f"Start date: {line[15]}",f"End Date: {line[16]}",''])
+    #                 reportDict.add_row([f"Title: {line[16]}",f"Department: {line[17]}",''])
+    #                 reportDict.add_row([f"Permission level: {line[18]}",'',''])
+    #             elif line[5] == 'Salary':
+    #                 reportDict.add_row([f"Employee ID: {line[0]}",f"Name: {line[1]}",f"Address: {' '.join(line[2:5])}"])
+    #                 reportDict.add_row([f"Classification: {line[5]}",f"Salary: {line[6].replace('(','')}",f"Payment Method: {line[8]}"])
+    #                 reportDict.add_row([f"Routing num: {line[9]}",f"Account Number: {line[10]}",f"Date of Birth: {line[11]}"])
+    #                 reportDict.add_row([f"SSN: {line[12]}",f"Phone Number: {line[13]}",f"Email: {line[14]}"])
+    #                 reportDict.add_row([f"Start date: {line[15]}",f"End Date: {line[16]}",''])
+    #                 reportDict.add_row([f"Title: {line[16]}",f"Department: {line[17]}",''])
+    #                 reportDict.add_row([f"Permission level: {line[18]}",'',''])
+    #             elif line[5] == 'Commissioned':
+    #                 reportDict.add_row([f"Employee ID: {line[0]}",f"Name: {line[1]}",f"Address: {' '.join(line[2:5])}"])
+    #                 reportDict.add_row([f"Classification: {line[5]}",f"Salary: {line[6].replace('(','')}",f"Commision Rate: {line[7].replace(')','')}"])
+    #                 reportDict.add_row([f"Payment Method: {line[8]}", f"Routing num: {line[9]}",f"Account Number: {line[10]}"])
+    #                 reportDict.add_row([f"Date of Birth: {line[11]}", f"SSN: {line[12]}",f"Phone Number: {line[13]}"])
+    #                 reportDict.add_row([f"Email: {line[14]}", f"Start date: {line[15]}",f"End Date: {line[16]}"])
+    #                 reportDict.add_row([f"Title: {line[16]}",f"Department: {line[17]}",''])
+    #                 reportDict.add_row([f"Permission level: {line[18]}",'',''])
+    #             reportDict.add_row([f"\n{' '.join(line[19:22])}",'','\n\n'])
                     
 
-        print(reportDict)   
-        report_text.insert(1.0,reportDict)   
-        report_text.pack(side=LEFT)
-        report_text.config(state='disabled')
+        # print(reportDict)   
+        # report_text.insert(1.0,reportDict)   
+        # report_text.pack(side=LEFT)
+        # report_text.config(state='disabled')
 
-        # Scrollbar
-        report_scrollbar = Scrollbar(report_window)
-        report_scrollbar.pack(side=RIGHT, fill=Y)
+        # # Scrollbar
+        # report_scrollbar = Scrollbar(report_window)
+        # report_scrollbar.pack(side=RIGHT, fill=Y)
 
-        # Attach scrollbar to textbox
-        report_text.config(yscrollcommand=report_scrollbar.set)
-        report_scrollbar.config(command=report_text.yview)
+        # # Attach scrollbar to textbox
+        # report_text.config(yscrollcommand=report_scrollbar.set)
+        # report_scrollbar.config(command=report_text.yview)
 
-        report_window.mainloop()
+        # report_window.mainloop()
         
     def read_receipts(self):
         """Reads in all receipt lists from the "receipts.csv" file, and adds

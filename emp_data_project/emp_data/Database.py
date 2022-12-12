@@ -494,6 +494,7 @@ class EmployeeDB:
         else:
             self.archived = open("./archived.csv", 'r', encoding="utf8")
         self.emp_list = []
+        self.admin_list = []
         self.archived_list = []
         self.update_emp_list()
         
@@ -515,7 +516,10 @@ class EmployeeDB:
             temp_emp.populate_from_row(row)
             if temp_emp not in self.archived_list:
                 temp_emp.job_status = 'active'
-                self.emp_list.append(temp_emp)
+                if temp_emp.permission == 'admin':
+                    self.admin_list.append(temp_emp)
+                else:
+                    self.emp_list.append(temp_emp)
                 
     def archive_employee(self, id_num):
         """Removes from emp list and adds them to the archived file.
@@ -631,7 +635,8 @@ def _add_row(employee: Employee, file):
                                  employee.dept, employee.permission, employee.password])
       
            
-
+def exportDB(employee,filePath):
+    _add_row(employee, filePath)
 
 def add_new_employee(emp_db: EmployeeDB, id_num, first_name, last_name,
                      address, city, state, zip_code, classification,
@@ -651,6 +656,8 @@ def add_new_employee(emp_db: EmployeeDB, id_num, first_name, last_name,
 
     emp_db.add_employee(employee)
     return employee
+
+
 
 
 def open_file(the_file):
